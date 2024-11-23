@@ -1,0 +1,28 @@
+<div class="card shadow col-lg-7 p-0">
+  <label class="card-header h4">預覽</label>
+
+  <div class="card-body d-flex flex-column p-4 gap-2">
+    <h5 class="my-0">功德主：</h5>
+    <input class="form-control" id="chief-result" title="chief" disabled />
+    <h5 class="my-0">眷屬：</h5>
+    <input class="form-control" id="members-result" title="member" disabled />
+  </div>
+
+  <div class="row row-gap-3 p-4">
+    <div class="col-md-4 d-grid">
+      <button class="btn btn-secondary" onclick="setChief(true)">
+        清除功德主
+      </button>
+    </div>
+    <div class="col-md-4 d-grid">
+      <button class="btn btn-secondary" onclick="setMembers(true)">
+        清除眷屬
+      </button>
+    </div>
+    <div class="col-md-4 d-grid">
+      <button class="btn btn-warning" onclick="updateRelationship()">
+        儲存至資料庫
+      </button>
+    </div>
+  </div>
+</div>

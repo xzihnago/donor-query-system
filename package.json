@@ -1,0 +1,40 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev:run": "tsx watch src",
+    "dev:proxy": "ngrok http --domain=evolving-surely-loon.ngrok-free.app 3000",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate",
+    "package:eslint": "eslint src",
+    "package:prettier": "prettier -c src/**/*.ts",
+    "package:bump-dependencies": "pnpm up -L"
+  },
+  "dependencies": {
+    "@prisma/client": "5.20.0",
+    "@xzihnago/middleware": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-fileupload": "^1.5.1",
+    "express-rate-limit": "^7.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "node-xlsx": "^0.24.0",
+    "prisma": "^5.20.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^5.0.0",
+    "@types/express-fileupload": "^1.5.1",
+    "@types/jsdom": "^21.1.7",
+    "@types/jsonwebtoken": "^9.0.7",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "ngrok": "5.0.0-beta.2",
+    "prettier": "3.3.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.9.0"
+  }
+}
