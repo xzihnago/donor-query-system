@@ -1,0 +1,13 @@
+<div class="container d-flex flex-column">
+  <div class="navbar justify-content-center">
+    <img src="/images/banner.png" alt="banner" />
+    <button class="btn btn-danger mx-1 position-absolute end-0" type="button" onclick="logout()">登出</button>
+  </div>
+  <nav id="nav" class="navbar justify-content-center bg-body-tertiary">
+    <a class="btn btn-outline-danger mx-1" role="button" href="/search">查詢積點</a>
+    <% if (admin === true) { %>
+      <a class="btn btn-outline-danger mx-1" role="button" href="/relation">加入積點關聯</a>
+      <a class="btn btn-outline-danger mx-1" role="button" href="/upload">捐款資料匯入</a>
+    <% } %>
+  </nav>
+</div>

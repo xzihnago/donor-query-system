@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-TW">
+  <%- include("components/head") %>
+
+  <body>
+    <%- include("components/nav") %>
+
+    <div class="container row mx-auto my-4 gap-4 justify-content-center">
+      <% for( const card of components ) { %>
+        <%- include(`components/${card}`) %>
+      <% } %>
+    </div>
+
+    <%- include("components/modal") %>
+  </body>
+</html>
