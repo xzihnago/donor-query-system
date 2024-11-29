@@ -22,11 +22,11 @@ model Donor {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  records DonationRecord[]
-  members Donor[]          @relation("DonorRelationship")
-  chief   Donor?           @relation("DonorRelationship", fields: [chiefId], references: [id])
-  chiefId String?
-  name    String           @unique
+  records    DonationRecord[]
+  inferiors  Donor[]          @relation("DonorRelations")
+  superior   Donor?           @relation("DonorRelations", fields: [superiorId], references: [id])
+  superiorId String?
+  name       String           @unique
 }
 
 model DonationRecord {

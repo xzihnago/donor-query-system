@@ -14,11 +14,18 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
     integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
     crossorigin="anonymous"
-    async
+    defer
   ></script>
   <script
-    src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
-    async
+    src="https://cdn.jsdelivr.net/npm/axios@1.7.8/dist/axios.min.js"
+    integrity="sha256-ck5yO5M7Jx846TvLAhUIl22yB2TVBaZ8kkozysb/aAw="
+    crossorigin="anonymous"
+    defer
   ></script>
-  <script src="/scripts/index.js" async></script>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: false });
+    window.mermaid = mermaid;
+  </script>
+  <script src="/scripts/index.js" defer></script>
 </head>

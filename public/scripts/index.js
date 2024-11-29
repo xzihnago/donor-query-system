@@ -1,41 +1,60 @@
 /* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 "use strict";
 
 const showModal = (title, content) => {
   const modal = new bootstrap.Modal(document.getElementById("modal"), {});
-
   const modalTitle = document.getElementById("modal-title");
-  modalTitle.innerText = title;
-
   const modalContent = document.getElementById("modal-content");
-  modalContent.innerHTML = content
-    .replace(/\n/g, "<br>")
-    .replace(/ /g, "&nbsp;");
+
+  modalTitle.innerText = title;
+  modalContent.innerHTML = content;
 
   modal.show();
 };
 
-const apiErrorHandler = (error) => {
-  if (error.response.status === 401) {
-    alert(error.response.data.error);
-    window.location.replace("/");
-  } else {
-    showModal("錯誤", error.response.data.error);
-  }
+const apiHandler = {
+  success: (res) => {
+    showModal("成功", res.data.data);
+  },
+
+  error: (error) => {
+    console.error(error);
+    if (window.location.pathname !== "/" && error.response.status === 401) {
+      alert(error.response.data.error);
+      window.location.replace("/");
+    } else {
+      showModal(
+        "錯誤",
+        typeof error.response.data.error === "string"
+          ? error.response.data.error
+          : JSON.stringify(error.response.data.error, null, 2)
+      );
+    }
+  },
 };
 
-const login = async () => {
-  const username = document.getElementById("account").value;
-  const password = document.getElementById("password").value;
+const drawRelationTree = (name) =>
+  axios
+    .get(`/api/donorRelations/${name}`)
+    .then(async (res) => {
+      const { svg } = await mermaid.render("graphDiv", res.data.data);
+      document.getElementById("mermaid").innerHTML = svg;
+    })
+    .catch(apiHandler.error);
 
-  await axios
+document.getElementById("form-login")?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+
+  const username = document.getElementById("input-username").value;
+  const password = document.getElementById("input-password").value;
+
+  axios
     .post("/api/user/login", {
       username,
       password,
@@ -43,105 +62,109 @@ const login = async () => {
     .then(() => {
       window.location.replace("/search");
     })
-    .catch(() => {
-      showModal("錯誤", "帳號或密碼錯誤");
+    .catch(apiHandler.error);
+});
+
+document.getElementById("button-logout")?.addEventListener("click", () => {
+  axios
+    .get("/api/user/logout")
+    .catch()
+    .then(() => {
+      window.location.replace("/");
     });
-};
+});
 
-const logout = async () => {
-  await axios.get("/api/user/logout").catch();
-  window.location.replace("/");
-};
+document.getElementById("form-search")?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
 
-const search = async () => {
-  const name = document.getElementById("search").value;
-  if (name === "") {
-    showModal("錯誤", "請輸入姓名");
-    return;
-  }
+  const nameInput = document.getElementById("input-search");
 
-  await axios
-    .get(`/api/donorRecords/${name}`)
+  axios
+    .get(`/api/donorRecords/search/${nameInput.value}`)
     .then((res) => {
-      document.getElementById("search-result").value = res.data;
+      document.getElementById("search-result").value = res.data.data;
     })
-    .catch(apiErrorHandler);
-};
+    .catch(apiHandler.error);
+});
 
-const relationData = {
-  name: null,
-  relations: [],
-};
+document.getElementById("form-superior")?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
 
-const setChief = (clear = false) => {
-  if (clear) {
-    relationData.name = null;
+  const superiorInput = document.getElementById("input-superior");
+  const superiorButton = document.getElementById("button-superior");
+
+  if (superiorInput.disabled) {
+    superiorInput.disabled = false;
+    superiorButton.className = "btn btn-warning";
+    superiorButton.innerText = "確認";
   } else {
-    const chiefInput = document.getElementById("chief-input").value;
-    if (chiefInput === "") {
-      showModal("錯誤", "欄位不可為空");
-      return;
-    }
+    superiorInput.disabled = true;
+    superiorButton.className = "btn btn-danger";
+    superiorButton.innerText = "變更";
 
-    relationData.name = chiefInput;
+    drawRelationTree(superiorInput.value);
   }
+});
 
-  document.getElementById("chief-result").value = relationData.name;
-};
+document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
 
-const setMembers = (clear = false) => {
-  if (clear) {
-    relationData.relations = [];
-  } else {
-    const memberInput = document.getElementById("members-input").value;
-    if (memberInput === "") {
-      showModal("錯誤", "欄位不可為空");
-      return;
-    } else if (memberInput === relationData.name) {
-      showModal("錯誤", "眷屬不可與功德主相同");
-      return;
-    }
+  const superiorInput = document.getElementById("input-superior");
+  const inferiorInput = document.getElementById("input-inferior");
 
-    relationData.relations.push(memberInput);
-  }
-
-  document.getElementById("members-result").value =
-    relationData.relations.join("、");
-};
-
-const updateRelationship = async () => {
-  const missingFields = [];
-  if (!relationData.name) missingFields.push("功德主");
-  if (relationData.relations.length === 0) missingFields.push("眷屬");
-  if (missingFields.length > 0) {
-    showModal("錯誤", `缺少欄位：${missingFields.join("、")}`);
+  if (inferiorInput.value === superiorInput.value) {
+    showModal("錯誤", "眷屬不可與功德主相同");
     return;
   }
 
-  await axios
-    .post("/api/donorRelationship", relationData)
-    .then((res) => {
-      showModal("成功", res.data);
-    })
-    .catch(apiErrorHandler);
-};
+  const relationData = {
+    superior: superiorInput.value,
+    inferior: inferiorInput.value,
+  };
 
-const upload = async () => {
-  const files = document.getElementById("file").files;
-  if (files.length === 0) {
-    showModal("錯誤", "請選擇檔案");
-    return;
+  switch (ev.submitter.name) {
+    case "update":
+      axios
+        .post("/api/donorRelations", relationData)
+        .then(drawRelationTree.bind(undefined, superiorInput.value))
+        .catch(apiHandler.error);
+      break;
+
+    case "delete":
+      axios
+        .delete(`/api/donorRelations/${inferiorInput.value}`)
+        .then(drawRelationTree.bind(undefined, superiorInput.value))
+        .catch(apiHandler.error);
+      break;
   }
+});
+
+document.getElementById("form-upload")?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+
+  const fileInput = document.getElementById("input-file");
 
   const formData = new FormData();
-  for (const file of files) {
+  for (const file of fileInput.files) {
     formData.append("records", file);
   }
 
-  await axios
+  axios
     .post("/api/donorRecords/upload", formData)
-    .then((res) => {
-      showModal("成功", res.data);
+    .then(apiHandler.success)
+    .catch(apiHandler.error);
+});
+
+document.getElementById("button-export")?.addEventListener("click", () => {
+  axios
+    .get("/api/donorRecords/export", {
+      responseType: "blob",
     })
-    .catch(apiErrorHandler);
-};
+    .then((res) => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(res.data);
+      link.download = `${Date.now()}.xlsx`;
+      link.click();
+    })
+    .catch(apiHandler.error);
+});

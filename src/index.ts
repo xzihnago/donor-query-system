@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import { rateLimit } from "express-rate-limit";
 import middleware from "@xzihnago/middleware";
-import "@/extensions";
+import "@/global";
 import router from "@/router";
 import routerWWW from "@/router/www";
 
@@ -35,6 +35,7 @@ app.use(
 );
 
 app.use(middleware.routeLog);
+app.use(middleware.responseHandler);
 app.use(express.static("public"));
 app.use("/api", router);
 app.use("/", routerWWW);

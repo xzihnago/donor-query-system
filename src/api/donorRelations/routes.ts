@@ -1,33 +1,37 @@
 import { Router } from "express";
+import middleware from "@xzihnago/middleware";
 import { user } from "@/middleware";
+import { updateDonorRelationsValidate } from "./validates";
 import * as controller from "./controller";
 
 const router = Router();
 
 router.get(
-  "/search/:name",
+  "/:name",
   user.auth,
   user.parse,
+  user.permission,
   user.keepUp,
-  controller.searchRecords
+  controller.findRelations
 );
 
 router.post(
-  "/upload",
+  "/",
   user.auth,
+  middleware.validateSchema.zod(updateDonorRelationsValidate),
   user.parse,
   user.permission,
   user.keepUp,
-  controller.uploadRecords
+  controller.updateRelations
 );
 
-router.get(
-  "/export",
+router.delete(
+  "/:name",
   user.auth,
   user.parse,
   user.permission,
   user.keepUp,
-  controller.exportRecords
+  controller.deleteRelations
 );
 
 export default router;

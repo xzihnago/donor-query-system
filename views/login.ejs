@@ -6,38 +6,8 @@
     <!-- banner -->
     <img class="mx-auto" src="/images/banner.png" alt="banner" />
 
-    <!-- log in -->
-    <div class="container col-sm-6">
-      <div class="card text-center">
-        <div class="card-header fs-5">捐款查詢系統</div>
-        <div class="card-body">
-          <!-- account -->
-          <div class="col-md-6 my-3 mx-auto">
-            <label class="form-label" for="account">帳號</label>
-            <input
-              class="form-control"
-              id="account"
-              type="text"
-              aria-describedby="passwordHelpBlock"
-            />
-          </div>
-
-          <!-- password -->
-          <div class="col-md-6 my-3 mx-auto">
-            <label class="form-label" for="password">密碼</label>
-            <input
-              class="form-control"
-              id="password"
-              type="password"
-              aria-describedby="passwordHelpBlock"
-            />
-          </div>
-          <button class="btn btn-danger my-2" type="button" onclick="login()">
-            登入
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- login -->
+    <%- include("components/card-login") %>
 
     <!-- page bottom margin, same as banner height -->
     <div style="margin-bottom: 118px"></div>

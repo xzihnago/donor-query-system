@@ -8,22 +8,16 @@ router.get("/", (_, res) => {
   res.render("login");
 });
 
-router.get(
-  "/search",
-  middleware.authentication.jwt(process.env.HMAC_SECRET ?? ""),
-  user.parse,
-  user.keepUp,
-  (req, res) => {
-    res.render("common", {
-      admin: req.user.admin,
-      components: ["card-search", "card-searchResult"],
-    });
-  }
-);
+router.get("/search", user.auth, user.parse, user.keepUp, (req, res) => {
+  res.render("common", {
+    admin: req.user.admin,
+    components: ["card-search", "card-searchResult"],
+  });
+});
 
 router.get(
   "/relation",
-  middleware.authentication.jwt(process.env.HMAC_SECRET ?? ""),
+  user.auth,
   user.parse,
   user.permission,
   user.keepUp,
@@ -31,9 +25,9 @@ router.get(
     res.render("common", {
       admin: true,
       components: [
-        "card-relationChief",
-        "card-relationMember",
-        "card-relationResult",
+        "card-relationSuperior",
+        "card-relationInferior",
+        "card-relationPreview",
       ],
     });
   }
@@ -41,12 +35,15 @@ router.get(
 
 router.get(
   "/upload",
-  middleware.authentication.jwt(process.env.HMAC_SECRET ?? ""),
+  user.auth,
   user.parse,
   user.permission,
   user.keepUp,
   (_, res) => {
-    res.render("common", { admin: true, components: ["card-upload"] });
+    res.render("common", {
+      admin: true,
+      components: ["card-upload", "card-export"],
+    });
   }
 );
 
