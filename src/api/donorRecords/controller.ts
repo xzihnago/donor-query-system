@@ -1,117 +1,136 @@
-import type { UploadedFile } from "express-fileupload";
+import type { RequestHandler } from "express";
 import xlsx from "node-xlsx";
 
-export const searchRecords = async (name: string) => {
-  const donor = await prisma.donor.findUnique({
-    where: { name },
-    include: {
-      records: true,
-      members: true,
-    },
-  });
+export const searchRecords: RequestHandler = async (req, res) => {
+  const data = await prisma.donor.findRefTree(req.params.name);
 
-  if (!donor) {
-    throw new Error("功德主不存在");
+  if (!data) {
+    res.status(404);
+    throw new Error(`「${req.params.name}」不存在`);
   }
 
-  // BFS
-  let amount = 0;
-  const members = [donor];
-  const nameList: string[] = [];
-  while (members.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const donor = members.shift()!;
+  const amount = data.reduce(
+    (acc, donor) =>
+      acc + donor.records.reduce((acc, record) => acc + record.amount, 0),
+    0
+  );
 
-    // Check reference cycle
-    if (nameList.includes(donor.name)) {
-      continue;
-    }
-    nameList.push(donor.name);
-
-    amount += donor.records.reduce((acc, record) => acc + record.amount, 0);
-
-    for (const member of donor.members) {
-      members.push(
-        await prisma.donor.findUniqueOrThrow({
-          where: { id: member.id },
-          include: {
-            records: true,
-            members: true,
-          },
-        })
-      );
-    }
-  }
-
-  return amount;
+  res.ok(amount);
 };
 
-export const uploadRecords = async (file: UploadedFile) => {
-  const records = xlsx.parse(file.data);
-
-  // Check if required tags are present
-  const headers = records[0].data[0];
-  const nameIndex = headers.indexOf("供養者");
-  const amountIndex = headers.indexOf("金額");
-
-  const missingTags = [];
-  if (nameIndex === -1) missingTags.push("供養者");
-  if (amountIndex === -1) missingTags.push("金額");
-  if (missingTags.length > 0) {
-    throw new Error(
-      `失敗：（${file.name}）\n    缺少標頭：${missingTags.join("、")}`
-    );
+export const uploadRecords: RequestHandler = async (req, res) => {
+  if (!req.files?.records) {
+    res.status(400);
+    throw new Error("無檔案");
   }
 
-  // Check if required fields are present
-  const errors: string[] = [];
-  const data = new Proxy({} as Record<string, number[]>, {
-    get: (target, p: string) => (target[p] ??= []),
-  });
-  let length = 0;
-  records[0].data.slice(1).forEach((record, index) => {
-    const name = record[nameIndex] as string;
-    const amount = record[amountIndex] as number;
+  const files = Array.isArray(req.files.records)
+    ? req.files.records
+    : [req.files.records];
 
-    const missingFields = [];
-    if (typeof name !== "string") missingFields.push("供養者");
-    if (typeof amount !== "number") missingFields.push("金額");
-    if (missingFields.length > 0) {
-      if (missingFields.length === 1) {
-        errors.push(
-          `    缺少欄位：第 ${(index + 2).toFixed()} 列（${missingFields[0]}）`
-        );
-      }
-      return;
+  const tasks = files.map(async (file) => {
+    const records = xlsx.parse(file.data);
+    const headers = records[0].data[0];
+    const contents = records[0].data.slice(1);
+
+    const nameIndex = headers.indexOf("供養者");
+    const amountIndex = headers.indexOf("金額");
+
+    // Check if required tags are present
+    const missing = [];
+    if (nameIndex === -1) missing.push("供養者");
+    if (amountIndex === -1) missing.push("金額");
+    if (missing.length > 0) {
+      return `錯誤：（${file.name}）\n    缺少標頭：${missing.join("、")}`;
     }
 
-    data[name].push(amount);
-    length++;
-  });
+    // Check if all required fields are present
+    const data = new Proxy({} as Record<string, number[]>, {
+      get: (target, p: string) => (target[p] ??= []),
+    });
 
-  if (errors.length > 0) {
-    throw new Error(`失敗：（${file.name}）\n` + errors.join("\n"));
-  }
+    const errors: string[] = [];
+    contents.forEach((record, index) => {
+      const name = record[nameIndex] as string;
+      const amount = record[amountIndex] as number;
 
-  // Insert data
-  await Promise.all(
-    Object.entries(data).map(([name, amount]) =>
-      prisma.donor
-        .upsert({
+      const missing = [];
+      if (typeof name !== "string") missing.push("供養者");
+      if (typeof amount !== "number") missing.push("金額");
+      if (missing.length > 0) {
+        if (missing.length === 1) {
+          errors.push(
+            `    缺少欄位：第 ${(index + 2).toFixed()} 列（${missing[0]}）`
+          );
+        }
+        return;
+      }
+
+      data[name].push(amount);
+    });
+
+    if (errors.length > 0) {
+      return `錯誤：（${file.name}）\n` + errors.join("\n");
+    }
+
+    // Insert data
+    await Promise.all(
+      Object.entries(data).map(async ([name, amounts]) => {
+        const donor = await prisma.donor.upsert({
           where: { name },
           create: { name },
           update: {},
-        })
-        .then((donor) =>
-          prisma.donationRecord.createMany({
-            data: amount.map((amount) => ({
-              donorId: donor.id,
-              amount,
-            })),
-          })
-        )
-    )
+        });
+
+        const data = amounts.map((amount) => ({
+          donorId: donor.id,
+          amount,
+        }));
+
+        await prisma.donationRecord.createMany({
+          data,
+        });
+      })
+    );
+
+    return `成功：匯入 ${contents.length.toFixed()} 筆資料（${file.name}）`;
+  });
+
+  const messages = await Promise.all(tasks);
+
+  res.ok(messages.join("\n"));
+};
+
+export const exportRecords: RequestHandler = async (_, res) => {
+  const donors = await prisma.donor.findMany({
+    include: { records: true, inferiors: true },
+  });
+
+  const data = await Promise.all(
+    donors.map(async (donor) => {
+      const data = await prisma.donor.findRefTree(donor.name);
+
+      const amount = data?.reduce(
+        (acc, donor) =>
+          acc + donor.records.reduce((acc, record) => acc + record.amount, 0),
+        0
+      );
+
+      return [donor.name, amount];
+    })
   );
 
-  return `成功：匯入 ${length.toFixed()} 筆資料（${file.name}）`;
+  const buffer = xlsx.build([
+    {
+      name: "總計表",
+      data: [["供養者", "金額"], ...data],
+      options: {},
+    },
+  ]);
+
+  res
+    .contentType(
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    .send(buffer);
 };

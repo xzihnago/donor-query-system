@@ -1,0 +1,25 @@
+<div class="card shadow col-lg-7 p-0">
+  <label class="card-header h4" for="input-inferior">眷屬</label>
+
+  <form class="card-body row row-gap-3 p-4" id="form-inferior">
+    <div class="col-md-6">
+      <input
+        class="form-control"
+        id="input-inferior"
+        type="text"
+        placeholder="姓名"
+        required
+        oninput="setCustomValidity('')"
+        oninvalid="setCustomValidity('請輸入姓名')"
+      />
+    </div>
+
+    <div class="col-md-3 d-grid">
+      <button class="btn btn-warning" type="submit" name="update">加入</button>
+    </div>
+
+    <div class="col-md-3 d-grid">
+      <button class="btn btn-danger" type="submit" name="delete">刪除</button>
+    </div>
+  </form>
+</div>

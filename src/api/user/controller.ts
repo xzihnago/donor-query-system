@@ -1,9 +1,12 @@
+import type { RequestHandler } from "express";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { loginUserValidate } from "./validates";
 
-export const login = async (data: z.infer<typeof loginUserValidate>) => {
+export const login: RequestHandler = async (req, res) => {
+  const data = req.body as z.infer<typeof loginUserValidate>;
+
   const passwordHash = crypto
     .createHmac("sha256", process.env.HMAC_SECRET ?? "")
     .update(data.password)
@@ -16,7 +19,8 @@ export const login = async (data: z.infer<typeof loginUserValidate>) => {
   });
 
   if (!user || user.passwordHash !== passwordHash) {
-    throw new Error("Invalid username or password");
+    res.status(401);
+    throw new Error("無效的使用者名稱或密碼");
   }
 
   await prisma.user.update({
@@ -27,10 +31,21 @@ export const login = async (data: z.infer<typeof loginUserValidate>) => {
       updatedAt: new Date(),
     },
   });
+
   const token = jwt.sign(
     { username: user.username },
     process.env.HMAC_SECRET ?? ""
   );
 
-  return { token };
+  res
+    .cookie("token", token, {
+      signed: true,
+      httpOnly: true,
+      secure: true,
+    })
+    .end();
+};
+
+export const logout: RequestHandler = (_, res) => {
+  res.clearCookie("token").end();
 };

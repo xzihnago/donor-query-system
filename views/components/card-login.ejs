@@ -1,0 +1,33 @@
+<div class="container col-sm-6">
+  <div class="card text-center">
+    <div class="card-header fs-5">捐款查詢系統</div>
+
+    <form class="card-body" id="form-login">
+      <div class="col-md-6 my-3 mx-auto">
+        <label class="form-label" for="input-username">使用者名稱</label>
+        <input
+          class="form-control"
+          id="input-username"
+          type="text"
+          required
+          oninput="setCustomValidity('')"
+          oninvalid="setCustomValidity('請輸入使用者名稱')"
+        />
+      </div>
+
+      <div class="col-md-6 my-3 mx-auto">
+        <label class="form-label" for="input-password">密碼</label>
+        <input
+          class="form-control"
+          id="input-password"
+          type="password"
+          required
+          oninput="setCustomValidity('')"
+          oninvalid="setCustomValidity('請輸入密碼')"
+        />
+      </div>
+
+      <button class="btn btn-danger my-2" type="submit">登入</button>
+    </form>
+  </div>
+</div>

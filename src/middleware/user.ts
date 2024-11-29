@@ -1,4 +1,5 @@
 import type { User } from "@prisma/client";
+import middleware from "@xzihnago/middleware";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -8,6 +9,12 @@ declare global {
     }
   }
 }
+
+const auth = middleware.authentication.jwt.bind(
+  null,
+  process.env.HMAC_SECRET ?? "",
+  "token"
+)();
 
 const parse: Middleware = async (req, _, next) => {
   const username = (req.jwt.decoded as { username: string }).username;
@@ -50,6 +57,6 @@ const keepUp: Middleware = async (req, res, next) => {
   next();
 };
 
-const user = { parse, permission, keepUp };
+const user = { auth, parse, permission, keepUp };
 
 export default user;
