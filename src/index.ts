@@ -9,6 +9,7 @@ import router from "@/router";
 import routerWWW from "@/router/www";
 
 const app = express();
+app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 
 app.use(express.json());
@@ -41,8 +42,8 @@ app.use("/api", router);
 app.use("/", routerWWW);
 
 try {
-  app.listen(3000, () => {
-    console.log("http://localhost:3000");
+  app.listen(process.env.PORT ?? 3000, () => {
+    console.log(`http://localhost:${process.env.PORT ?? "3000"}`);
   });
 } catch (err) {
   console.log(err);

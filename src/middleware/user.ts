@@ -31,8 +31,7 @@ const parse: Middleware = async (req, _, next) => {
 const permission: Middleware = (req, res, next) => {
   if (!req.user.admin) {
     res.status(403);
-    next(new Error("權限不足"));
-    return;
+    throw new Error("權限不足");
   }
 
   next();
@@ -41,8 +40,7 @@ const permission: Middleware = (req, res, next) => {
 const keepUp: Middleware = async (req, res, next) => {
   if (Date.now() - req.user.updatedAt.getTime() > 10 * 60 * 1000) {
     res.status(401);
-    next(new Error("登入已過期，請重新登入"));
-    return;
+    throw new Error("登入已過期，請重新登入");
   }
 
   await prisma.user.update({
