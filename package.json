@@ -1,11 +1,12 @@
 {
   "type": "module",
-  "version": "0.2.0-a.1",
+  "version": "0.2.1",
   "scripts": {
-    "prod:run": "tsx src",
+    "prod:run": "NODE_ENV=production tsx src",
     "dev:run": "tsx watch src",
     "dev:proxy": "ngrok http --domain=evolving-surely-loon.ngrok-free.app 3000",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:migrate-dev": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "package:eslint": "eslint src",
     "package:prettier": "prettier -c src/**/*.ts",
