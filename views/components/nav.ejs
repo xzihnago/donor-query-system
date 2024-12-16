@@ -1,9 +1,17 @@
 <div class="container d-flex flex-column">
+  <style>
+    @media (max-width: 400px) {
+      .nav-breakpoint {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
   <div class="navbar justify-content-center">
     <img src="/images/banner.png" alt="banner" />
     <button class="btn btn-danger mx-1 position-absolute end-0" id="button-logout" type="button">登出</button>
   </div>
-  <nav id="nav" class="navbar justify-content-center bg-body-tertiary">
+  <nav class="navbar row-gap-2 justify-content-center bg-body-tertiary nav-breakpoint">
     <a class="btn btn-outline-danger mx-1" role="button" href="/search">查詢積點</a>
     <% if (admin === true) { %>
       <a class="btn btn-outline-danger mx-1" role="button" href="/relation">加入積點關聯</a>
