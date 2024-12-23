@@ -74,6 +74,7 @@ export const uploadRecords: RequestHandler = async (req, res) => {
     }
 
     // Insert data
+    let count = 0;
     await Promise.all(
       Object.entries(data).map(async ([name, amounts]) => {
         const donor = await prisma.donor.upsert({
@@ -86,6 +87,7 @@ export const uploadRecords: RequestHandler = async (req, res) => {
           donorId: donor.id,
           amount,
         }));
+        count += data.length;
 
         await prisma.donationRecord.createMany({
           data,
@@ -93,7 +95,7 @@ export const uploadRecords: RequestHandler = async (req, res) => {
       })
     );
 
-    return `成功：匯入 ${contents.length.toFixed()} 筆資料（${file.name}）`;
+    return `成功：匯入 ${count.toFixed()} 筆資料（${file.name}）`;
   });
 
   const messages = await Promise.all(tasks);
