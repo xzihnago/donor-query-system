@@ -1,0 +1,57 @@
+<div class="card shadow col-lg-7 p-0">
+  <label class="card-header h4">資料庫</label>
+
+  <div class="card-body row row-gap-3 p-4">
+    <div class="col-md-6 d-grid">
+      <button class="btn btn-warning" id="button-export" type="button">
+        匯出並下載
+      </button>
+    </div>
+    <div class="col-md-6 d-grid">
+      <button
+        class="btn btn-danger"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#modal-delete"
+      >
+        重設資料庫
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-delete" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">重設資料庫</h5>
+      </div>
+
+      <!-- prettier-ignore -->
+      <div class="modal-body" style="white-space: pre">
+        以下資料將會刪除：
+        　　所有捐款紀錄
+        　　未加入關聯之捐款者
+
+        以下資料將會保留：
+        　　已加入關聯之捐款者
+
+        此操作不可逆，確定重設資料庫？
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
+          取消
+        </button>
+        <button
+          class="btn btn-danger"
+          id="button-delete"
+          type="button"
+          data-bs-dismiss="modal"
+        >
+          確定
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

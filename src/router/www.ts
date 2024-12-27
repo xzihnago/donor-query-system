@@ -1,6 +1,6 @@
 import { Router } from "express";
 import middleware from "@xzihnago/middleware";
-import { user } from "@/middleware";
+import { PermissionBits, user } from "@/middleware";
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router.get("/", (_, res) => {
 
 router.get("/search", user.auth, user.parse, user.keepUp, (req, res) => {
   res.render("common", {
-    admin: req.user.admin,
+    permission: req.user.permissions,
     components: ["card-search", "card-searchResult"],
   });
 });
@@ -19,11 +19,11 @@ router.get(
   "/relation",
   user.auth,
   user.parse,
-  user.permission,
+  user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
-  (_, res) => {
+  (req, res) => {
     res.render("common", {
-      admin: true,
+      permission: req.user.permissions,
       components: [
         "card-relationSuperior",
         "card-relationInferior",
@@ -37,12 +37,12 @@ router.get(
   "/upload",
   user.auth,
   user.parse,
-  user.permission,
+  user.permission(PermissionBits.MANAGE_DATABASE),
   user.keepUp,
-  (_, res) => {
+  (req, res) => {
     res.render("common", {
-      admin: true,
-      components: ["card-upload", "card-export"],
+      permission: req.user.permissions,
+      components: ["card-upload", "card-database"],
     });
   }
 );

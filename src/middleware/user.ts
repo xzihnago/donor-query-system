@@ -10,13 +10,13 @@ declare global {
   }
 }
 
-const auth = middleware.authentication.jwt.bind(
+export const auth = middleware.authentication.jwt.bind(
   null,
   process.env.HMAC_SECRET ?? "",
   "token"
 )();
 
-const parse: Middleware = async (req, _, next) => {
+export const parse: Middleware = async (req, _, next) => {
   const username = (req.jwt.decoded as { username: string }).username;
 
   req.user = await prisma.user.findUniqueOrThrow({
@@ -28,16 +28,17 @@ const parse: Middleware = async (req, _, next) => {
   next();
 };
 
-const permission: Middleware = (req, res, next) => {
-  if (!req.user.admin) {
-    res.status(403);
-    throw new Error("權限不足");
-  }
+export const permission: Middleware<[flag: number]> =
+  (flag) => (req, res, next) => {
+    if ((req.user.permissions & flag) !== flag) {
+      res.status(403);
+      throw new Error("權限不足");
+    }
 
-  next();
-};
+    next();
+  };
 
-const keepUp: Middleware = async (req, res, next) => {
+export const keepUp: Middleware = async (req, res, next) => {
   if (Date.now() - req.user.updatedAt.getTime() > 10 * 60 * 1000) {
     res.status(401);
     throw new Error("登入已過期，請重新登入");
@@ -55,6 +56,8 @@ const keepUp: Middleware = async (req, res, next) => {
   next();
 };
 
-const user = { auth, parse, permission, keepUp };
-
-export default user;
+export enum PermissionBits {
+  SEARCH = 1,
+  EDIT_RELATION = 2,
+  MANAGE_DATABASE = 4,
+}
