@@ -1,6 +1,6 @@
 import { Router } from "express";
 import middleware from "@xzihnago/middleware";
-import { user } from "@/middleware";
+import { PermissionBits, user } from "@/middleware";
 import { updateDonorRelationsValidate } from "./validates";
 import * as controller from "./controller";
 
@@ -10,7 +10,7 @@ router.get(
   "/:name",
   user.auth,
   user.parse,
-  user.permission,
+  user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
   controller.findRelations
 );
@@ -20,7 +20,7 @@ router.post(
   user.auth,
   middleware.validateSchema.zod(updateDonorRelationsValidate),
   user.parse,
-  user.permission,
+  user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
   controller.updateRelations
 );
@@ -29,7 +29,7 @@ router.delete(
   "/:name",
   user.auth,
   user.parse,
-  user.permission,
+  user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
   controller.deleteRelations
 );

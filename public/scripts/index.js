@@ -168,3 +168,7 @@ document.getElementById("button-export")?.addEventListener("click", () => {
     })
     .catch(apiHandler.error);
 });
+
+document.getElementById("button-delete")?.addEventListener("click", () => {
+  axios.delete("/api/donor").then(apiHandler.success).catch(apiHandler.error);
+});
