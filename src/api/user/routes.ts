@@ -1,5 +1,5 @@
 import { Router } from "express";
-import middleware from "@xzihnago/middleware";
+import { middleware } from "@xzihnago/express-utils";
 import { loginUserValidate } from "./validates";
 import * as controller from "./controller";
 

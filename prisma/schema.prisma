@@ -26,7 +26,8 @@ model Donor {
   inferiors  Donor[]          @relation("DonorRelations")
   superior   Donor?           @relation("DonorRelations", fields: [superiorId], references: [id])
   superiorId String?
-  name       String           @unique
+
+  name String @unique
 }
 
 model DonationRecord {
@@ -36,5 +37,6 @@ model DonationRecord {
 
   donor   Donor  @relation(fields: [donorId], references: [id])
   donorId String
-  amount  Int
+
+  amount Int
 }

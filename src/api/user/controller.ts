@@ -1,16 +1,11 @@
 import type { RequestHandler } from "express";
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { utils } from "@xzihnago/express-utils";
 import { loginUserValidate } from "./validates";
 
 export const login: RequestHandler = async (req, res) => {
   const data = req.body as z.infer<typeof loginUserValidate>;
-
-  const passwordHash = crypto
-    .createHmac("sha256", process.env.HMAC_SECRET ?? "")
-    .update(data.password)
-    .digest("hex");
 
   const user = await prisma.user.findUnique({
     where: {
@@ -18,7 +13,10 @@ export const login: RequestHandler = async (req, res) => {
     },
   });
 
-  if (!user || user.passwordHash !== passwordHash) {
+  if (
+    !user ||
+    !(await utils.password.bcrypt.verify(data.password, user.passwordHash))
+  ) {
     res.status(401);
     throw new Error("無效的使用者名稱或密碼");
   }

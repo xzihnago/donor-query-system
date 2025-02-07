@@ -1,5 +1,5 @@
 import express from "express";
-import middleware from "@xzihnago/middleware";
+import { middleware } from "@xzihnago/express-utils";
 import userRoutes from "@/api/user/routes";
 import donorRoutes from "@/api/donor/routes";
 import donorRecordRoutes from "@/api/donorRecords/routes";
