@@ -1,9 +1,10 @@
 {
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "scripts": {
     "prod:run": "NODE_ENV=production tsx src",
     "dev:run": "tsx watch src",
+    "dev:check": "tsc --noEmit",
     "dev:proxy": "ngrok http --domain=evolving-surely-loon.ngrok-free.app 3000",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate-dev": "prisma migrate dev",
@@ -13,30 +14,30 @@
     "package:bump-dependencies": "pnpm up -L"
   },
   "dependencies": {
-    "@prisma/client": "6.0.0",
-    "@xzihnago/middleware": "github:xzihnago/express-utils#0.1.0",
+    "@prisma/client": "6.3.1",
+    "@xzihnago/express-utils": "github:xzihnago/express-utils#0.2.0",
     "cookie-parser": "^1.4.7",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^5.0.1",
     "express-fileupload": "^1.5.1",
-    "express-rate-limit": "^7.4.1",
+    "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
     "node-xlsx": "^0.24.0",
-    "prisma": "^6.0.0",
+    "prisma": "^6.3.1",
     "tsx": "^4.19.2",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
     "@types/express-fileupload": "^1.5.1",
-    "@types/jsonwebtoken": "^9.0.7",
-    "eslint": "^9.15.0",
-    "eslint-config-prettier": "^9.1.0",
+    "@types/jsonwebtoken": "^9.0.8",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
     "ngrok": "5.0.0-beta.2",
-    "prettier": "3.4.1",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.16.0"
+    "prettier": "3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.23.0"
   }
 }

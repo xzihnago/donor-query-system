@@ -1,5 +1,5 @@
 import type { User } from "@prisma/client";
-import middleware from "@xzihnago/middleware";
+import { middleware } from "@xzihnago/express-utils";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -28,9 +28,9 @@ export const parse: Middleware = async (req, _, next) => {
   next();
 };
 
-export const permission: Middleware<[flag: number]> =
+export const permission: Middleware<[flag: PermissionBits]> =
   (flag) => (req, res, next) => {
-    if ((req.user.permissions & flag) !== flag) {
+    if ((req.user.permissions & flag) !== (flag as number)) {
       res.status(403);
       throw new Error("權限不足");
     }

@@ -3,7 +3,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import { rateLimit } from "express-rate-limit";
-import middleware from "@xzihnago/middleware";
+import { middleware } from "@xzihnago/express-utils";
 import "@/global";
 import router from "@/router";
 import routerWWW from "@/router/www";

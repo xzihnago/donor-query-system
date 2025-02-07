@@ -143,16 +143,21 @@ document.getElementById("form-upload")?.addEventListener("submit", (ev) => {
   ev.preventDefault();
 
   const fileInput = document.getElementById("input-file");
+  const uploadButton = document.getElementById("button-upload");
 
   const formData = new FormData();
   for (const file of fileInput.files) {
     formData.append("records", file);
   }
 
+  uploadButton.disabled = true;
   axios
     .post("/api/donorRecords/upload", formData)
     .then(apiHandler.success)
-    .catch(apiHandler.error);
+    .catch(apiHandler.error)
+    .finally(() => {
+      uploadButton.disabled = false;
+    });
 });
 
 document.getElementById("button-export")?.addEventListener("click", () => {
