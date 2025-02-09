@@ -32,7 +32,7 @@ export const login: RequestHandler = async (req, res) => {
 
   const token = jwt.sign(
     { username: user.username },
-    process.env.HMAC_SECRET ?? ""
+    process.env.JWT_SECRET ?? ""
   );
 
   res

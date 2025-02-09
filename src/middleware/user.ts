@@ -12,7 +12,7 @@ declare global {
 
 export const auth = middleware.authentication.jwt.bind(
   null,
-  process.env.HMAC_SECRET ?? "",
+  process.env.JWT_SECRET ?? "",
   "token"
 )();
 
