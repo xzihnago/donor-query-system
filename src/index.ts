@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
-import { rateLimit } from "express-rate-limit";
 import { middleware } from "@xzihnago/express-utils";
 import "@/global";
 import router from "@/router";
@@ -19,19 +18,6 @@ app.use(
     defParamCharset: "utf8",
     limits: { fileSize: 50 * 1024 * 1024 },
     abortOnLimit: true,
-  })
-);
-app.use(
-  rateLimit({
-    limit: 60,
-    message: "操作頻率過高，請稍後再試",
-    handler: (req, res, _, options) =>
-      res.status(options.statusCode).send(`
-        <script>
-          alert("${options.message as string}");
-          window.location.replace("${req.path}");
-        </script>
-      `),
   })
 );
 
