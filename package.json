@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "scripts": {
     "prod:run": "NODE_ENV=production tsx src",
     "dev:run": "tsx watch src",
