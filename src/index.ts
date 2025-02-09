@@ -23,7 +23,6 @@ app.use(
 
 app.use(middleware.routeLog);
 app.use(middleware.responseHandler);
-app.use(express.static("public"));
 app.use("/api", router);
 app.use("/", routerWWW);
 
