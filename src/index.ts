@@ -12,7 +12,7 @@ app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 
 app.use(express.json());
-app.use(cookieParser(process.env.HMAC_SECRET ?? ""));
+app.use(cookieParser(process.env.JWT_SECRET ?? ""));
 app.use(
   fileUpload({
     defParamCharset: "utf8",
