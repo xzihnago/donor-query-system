@@ -8,7 +8,7 @@ import router from "@/router";
 import routerWWW from "@/router/www";
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", 2);
 app.set("view engine", "ejs");
 
 app.use(express.json());
