@@ -6,7 +6,7 @@ export const searchRecords: RequestHandler = async (req, res) => {
 
   if (!data) {
     res.status(404);
-    throw new Error(`「${req.params.name}」不存在`);
+    throw new Error(`「${req.params.name}」不存在於資料庫中`);
   }
 
   const amount = data.reduce(
