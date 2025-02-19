@@ -2,12 +2,12 @@ import type { RequestHandler } from "express";
 import xlsx from "node-xlsx";
 
 export const searchRecords: RequestHandler = async (req, res) => {
-  const data = await prisma.donor.findRefTree(req.params.name);
-
-  if (!data) {
-    res.status(404);
-    throw new Error(`「${req.params.name}」不存在於資料庫中`);
-  }
+  const data = await prisma.donor
+    .findRefTreeOrThrow(req.params.name)
+    .catch(() => {
+      res.status(404);
+      throw new Error(`"${req.params.name}" does not exist`);
+    });
 
   const amount = data.reduce(
     (acc, donor) =>
@@ -19,109 +19,120 @@ export const searchRecords: RequestHandler = async (req, res) => {
 };
 
 export const uploadRecords: RequestHandler = async (req, res) => {
-  if (!req.files?.records) {
+  if (!req.files) {
     res.status(400);
-    throw new Error("無檔案");
+    throw new Error("No files");
   }
 
-  const files = Array.isArray(req.files.records)
-    ? req.files.records
-    : [req.files.records];
+  const files = Object.values(req.files)
+    .map((value) => value)
+    .flat();
 
   const tasks = files.map(async (file) => {
-    const records = xlsx.parse(file.data);
-    const headers = records[0].data[0];
-    const contents = records[0].data.slice(1);
+    const sheets = xlsx.parse(file.data);
+    const [headers, contents] = [sheets[0].data[0], sheets[0].data.slice(1)];
 
-    const nameIndex = headers.indexOf("供養者");
-    const amountIndex = headers.indexOf("金額");
+    const indexes = [headers.indexOf("供養者"), headers.indexOf("金額")];
 
-    // Check if required tags are present
-    const missing = [];
-    if (nameIndex === -1) missing.push("供養者");
-    if (amountIndex === -1) missing.push("金額");
+    // Check if required headers are present
+    const missing = ["供養者", "金額"].filter((_, i) => indexes[i] === -1);
     if (missing.length > 0) {
-      return `錯誤：（${file.name}）\n    缺少標頭：${missing.join("、")}`;
+      return {
+        type: "MISSING_HEADER",
+        file: file.name,
+        error: missing,
+      };
     }
 
-    // Check if all required fields are present
-    const data = new Proxy({} as Record<string, number[]>, {
-      get: (target, p: string) => (target[p] ??= []),
-    });
+    // Check if required fields are present
+    const error: { line: number; missing: string[] }[] = [];
+    const records = contents
+      .map<[unknown, unknown, number]>((row, line) => [
+        row[indexes[0]],
+        row[indexes[1]],
+        line,
+      ])
+      .filter((record): record is [string, number, number] => {
+        const missing = ["供養者", "金額"].filter(
+          (_, i) => typeof record[i] !== ["string", "number"][i]
+        );
 
-    const errors: string[] = [];
-    contents.forEach((record, index) => {
-      const name = record[nameIndex] as string;
-      const amount = record[amountIndex] as number;
-
-      const missing = [];
-      if (typeof name !== "string") missing.push("供養者");
-      if (typeof amount !== "number") missing.push("金額");
-      if (missing.length > 0) {
         if (missing.length === 1) {
-          errors.push(
-            `    缺少欄位：第 ${(index + 2).toFixed()} 列（${missing[0]}）`
-          );
+          error.push({
+            line: record[2] + 2,
+            missing,
+          });
         }
-        return;
-      }
 
-      data[name].push(amount);
-    });
+        return missing.length === 0;
+      });
 
-    if (errors.length > 0) {
-      return `錯誤：（${file.name}）\n` + errors.join("\n");
+    if (error.length > 0) {
+      return {
+        type: "INVALID_DATA",
+        file: file.name,
+        error,
+      };
     }
 
-    // Insert data
-    let count = 0;
-    await Promise.all(
-      Object.entries(data).map(async ([name, amounts]) => {
-        const donor = await prisma.donor.upsert({
+    // Insert data into database
+    const nameMap = new Proxy<Record<string, number[]>>(
+      {},
+      {
+        get: (target, p: string) => (target[p] ??= []),
+      }
+    );
+    records.forEach((record) => nameMap[record[0]].push(record[1]));
+
+    const dbTasks = Object.entries(nameMap).map(([name, amounts]) =>
+      prisma.donor
+        .upsert({
           where: { name },
           create: { name },
           update: {},
-        });
+        })
+        .then((donor) => {
+          const data = amounts.map((amount) => ({
+            donorId: donor.id,
+            amount,
+          }));
 
-        const data = amounts.map((amount) => ({
-          donorId: donor.id,
-          amount,
-        }));
-        count += data.length;
-
-        await prisma.donationRecord.createMany({
-          data,
-        });
-      })
+          return prisma.donationRecord.createMany({
+            data,
+          });
+        })
     );
+    await Promise.all(dbTasks);
 
-    return `成功：匯入 ${count.toFixed()} 筆資料（${file.name}）`;
+    return {
+      type: "SUCCESS",
+      file: file.name,
+      count: records.length,
+    };
   });
 
-  const messages = await Promise.all(tasks);
+  const data = await Promise.all(tasks);
 
-  res.ok(messages.join("\n"));
+  res.ok(data);
 };
 
 export const exportRecords: RequestHandler = async (_, res) => {
   const donors = await prisma.donor.findMany({
-    include: { records: true, inferiors: true },
+    include: { records: true },
   });
 
-  const data = await Promise.all(
-    donors.map(async (donor) => {
-      const data = await prisma.donor.findRefTree(donor.name);
+  const tasks = donors.map(async (donor) => {
+    const data = await prisma.donor.findRefTreeOrThrow(donor.name);
+    const amount = data.reduce(
+      (acc, donor) =>
+        acc + donor.records.reduce((acc, record) => acc + record.amount, 0),
+      0
+    );
 
-      const amount = data?.reduce(
-        (acc, donor) =>
-          acc + donor.records.reduce((acc, record) => acc + record.amount, 0),
-        0
-      );
+    return [donor.name, amount];
+  });
 
-      return [donor.name, amount];
-    })
-  );
-
+  const data = await Promise.all(tasks);
   const buffer = xlsx.build([
     {
       name: "總計表",

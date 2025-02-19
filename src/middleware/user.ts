@@ -32,7 +32,7 @@ export const permission: Middleware<[flag: PermissionBits]> =
   (flag) => (req, res, next) => {
     if ((req.user.permissions & flag) !== (flag as number)) {
       res.status(403);
-      throw new Error("權限不足");
+      throw new Error("Permission denied");
     }
 
     next();
@@ -41,7 +41,7 @@ export const permission: Middleware<[flag: PermissionBits]> =
 export const keepUp: Middleware = async (req, res, next) => {
   if (Date.now() - req.user.updatedAt.getTime() > 10 * 60 * 1000) {
     res.status(401);
-    throw new Error("登入已過期，請重新登入");
+    throw new Error("Token expired");
   }
 
   await prisma.user.update({
