@@ -15,7 +15,7 @@
 
 ```ts
 {
-  "data": <any>
+  data: any,
 }
 ```
 
@@ -25,7 +25,7 @@
 
 ```ts
 {
-  "error": <any>
+  error: any,
 }
 ```
 
@@ -40,8 +40,8 @@
 
 ```ts
 {
-  "username": <string>,
-  "password": <string>
+  username: string,
+  password: string,
 }
 ```
 
@@ -83,7 +83,10 @@
 
 ```ts
 {
-  "data": <string>
+  data: {
+    donors: number,
+    records: number,
+  }
 }
 ```
 
@@ -104,7 +107,7 @@
 
 ```ts
 {
-  "data": <number>
+  data: number,
 }
 ```
 
@@ -118,18 +121,33 @@
 
 本 API 需要授權，若授權無效將回傳 `HTTP 401`。
 
-表單中包含一個 `records` 欄位，檔案格式為一個或多個 Excel 檔案。<br>
+表單中包含任意名稱欄位，檔案格式為一個或多個 Excel 檔案。<br>
 Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
 
 | 欄位名稱 | 資料型態         | 說明                  |
 | -------- | ---------------- | --------------------- |
-| records  | `File \| File[]` | 一個或多個 Excel 檔案 |
+| <any>    | `File \| File[]` | 一個或多個 Excel 檔案 |
 
 #### Response
 
 ```ts
 {
-  "data": <string>
+  data: ({
+      type: "SUCCESS";
+      file: string;
+      count: number;
+  } | {
+      type: "MISSING_HEADER";
+      file: string;
+      error: string[];
+  } | {
+      type: "INVALID_DATA";
+      file: string;
+      error: {
+          line: number;
+          missing: string[];
+      }[];
+  })[]
 }
 ```
 
@@ -164,7 +182,7 @@ Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
 
 ```ts
 {
-  "data": <string>
+  data: ([string] | [string, string])[],
 }
 ```
 
@@ -180,8 +198,8 @@ Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
 
 ```ts
 {
-  "superior": <string>,
-  "inferior": <string>
+  superior: string,
+  inferior: string,
 }
 ```
 
