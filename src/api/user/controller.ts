@@ -18,7 +18,7 @@ export const login: RequestHandler = async (req, res) => {
     !(await utils.password.bcrypt.verify(data.password, user.passwordHash))
   ) {
     res.status(401);
-    throw new Error("無效的使用者名稱或密碼");
+    throw new Error("Invalid username or password");
   }
 
   await prisma.user.update({

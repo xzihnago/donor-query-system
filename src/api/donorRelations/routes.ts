@@ -22,7 +22,7 @@ router.post(
   user.parse,
   user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
-  controller.updateRelations
+  controller.addRelations
 );
 
 router.delete(
@@ -31,7 +31,7 @@ router.delete(
   user.parse,
   user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
-  controller.deleteRelations
+  controller.removeRelations
 );
 
 export default router;
