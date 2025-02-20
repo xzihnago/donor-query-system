@@ -7,30 +7,26 @@ document.getElementById("form-superior")?.addEventListener("submit", (ev) => {
   const inferiorInput = getElement<HTMLInputElement>("input-inferior");
   const superiorButton = getElement("button-superior");
 
-  const toggleInput = () => {
-    if (superiorInput.disabled) {
-      superiorInput.disabled = false;
-      inferiorInput.disabled = true;
-      superiorButton.className = "btn btn-warning";
-      superiorButton.innerText = "確認";
-    } else {
-      superiorInput.disabled = true;
-      inferiorInput.disabled = false;
-      superiorButton.className = "btn btn-danger";
-      superiorButton.innerText = "變更";
+  if (superiorInput.disabled) {
+    superiorInput.disabled = false;
+    inferiorInput.disabled = true;
+    superiorButton.className = "btn btn-warning";
+    superiorButton.innerText = "確認";
+  } else {
+    superiorInput.disabled = true;
+    inferiorInput.disabled = false;
+    superiorButton.className = "btn btn-danger";
+    superiorButton.innerText = "變更";
 
-      drawRelationTree(superiorInput.value).catch(
-        apiHandler.failed({
-          404: (data) => {
-            toggleInput();
-            return `「${(data.error as CommonError).message}」不在資料庫中`;
-          },
-        })
-      );
-    }
-  };
-
-  toggleInput();
+    drawRelationTree(superiorInput.value).catch(
+      apiHandler.failed({
+        404: (data) => {
+          superiorButton.click();
+          return `「${(data.error as CommonError).message}」不在資料庫中`;
+        },
+      })
+    );
+  }
 });
 
 document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
@@ -76,9 +72,6 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
       break;
   }
 });
-
-type MermainData = ([string] | [string, string])[];
-
 const drawRelationTree = async (name: string) =>
   axios
     .get<APIResponseSuccess<MermainData>>(`/api/donorRelations/${name}`)
@@ -96,3 +89,5 @@ const drawRelationTree = async (name: string) =>
       const { svg } = await mermaid.render("graphDiv", graph.join("\n"));
       getElement("mermaid").innerHTML = svg;
     });
+
+type MermainData = ([string] | [string, string])[];

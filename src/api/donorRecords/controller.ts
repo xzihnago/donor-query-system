@@ -6,7 +6,7 @@ export const searchRecords: RequestHandler = async (req, res) => {
     .findRefTreeOrThrow(req.params.name)
     .catch(() => {
       res.status(404);
-      throw new Error(`"${req.params.name}" does not exist`);
+      throw new Error(req.params.name);
     });
 
   const amount = data.reduce(
@@ -29,9 +29,17 @@ export const uploadRecords: RequestHandler = async (req, res) => {
     .flat();
 
   const tasks = files.map(async (file) => {
-    const sheets = xlsx.parse(file.data);
-    const [headers, contents] = [sheets[0].data[0], sheets[0].data.slice(1)];
+    let sheets;
+    try {
+      sheets = xlsx.parse(file.data);
+    } catch {
+      return {
+        type: "INVALID_FILE",
+        file: file.name,
+      };
+    }
 
+    const [headers, contents] = [sheets[0].data[0], sheets[0].data.slice(1)];
     const indexes = [headers.indexOf("供養者"), headers.indexOf("金額")];
 
     // Check if required headers are present
@@ -84,25 +92,23 @@ export const uploadRecords: RequestHandler = async (req, res) => {
     );
     records.forEach((record) => nameMap[record[0]].push(record[1]));
 
-    const dbTasks = Object.entries(nameMap).map(([name, amounts]) =>
+    const tasks = Object.entries(nameMap).map(([name, amounts]) =>
       prisma.donor
         .upsert({
           where: { name },
           create: { name },
           update: {},
         })
-        .then((donor) => {
-          const data = amounts.map((amount) => ({
-            donorId: donor.id,
-            amount,
-          }));
-
-          return prisma.donationRecord.createMany({
-            data,
-          });
-        })
+        .then((donor) =>
+          prisma.donationRecord.createMany({
+            data: amounts.map((amount) => ({
+              donorId: donor.id,
+              amount,
+            })),
+          })
+        )
     );
-    await Promise.all(dbTasks);
+    await Promise.all(tasks);
 
     return {
       type: "SUCCESS",

@@ -8,12 +8,19 @@ router.get("/", (_, res) => {
   res.render("login");
 });
 
-router.get("/search", user.auth, user.parse, user.keepUp, (req, res) => {
-  res.render("common", {
-    permission: req.user.permissions,
-    components: ["card-search", "card-searchResult"],
-  });
-});
+router.get(
+  "/search",
+  user.auth,
+  user.parse,
+  user.permission(PermissionBits.SEARCH),
+  user.keepUp,
+  (req, res) => {
+    res.render("common", {
+      permission: req.user.permissions,
+      components: ["card-search", "card-searchResult"],
+    });
+  }
+);
 
 router.get(
   "/relation",
