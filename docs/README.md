@@ -137,6 +137,9 @@ Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
       file: string;
       count: number;
   } | {
+      type: "INVALID_FILE";
+      file: string;
+  } | {
       type: "MISSING_HEADER";
       file: string;
       error: string[];
