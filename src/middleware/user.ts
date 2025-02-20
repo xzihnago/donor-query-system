@@ -18,7 +18,6 @@ export const auth = middleware.authentication.jwt.bind(
 
 export const parse: Middleware = async (req, _, next) => {
   const username = (req.jwt.decoded as { username: string }).username;
-
   req.user = await prisma.user.findUniqueOrThrow({
     where: {
       username,

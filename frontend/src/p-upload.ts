@@ -12,7 +12,6 @@ document.getElementById("form-upload")?.addEventListener("submit", (ev) => {
   }
 
   uploadButton.disabled = true;
-
   axios
     .post<APIUploadSheet>("/api/donorRecords/upload", formData)
     .then((res) => {
@@ -20,6 +19,9 @@ document.getElementById("form-upload")?.addEventListener("submit", (ev) => {
         switch (data.type) {
           case "SUCCESS":
             return `成功（${data.file}）\n\u3000匯入 ${data.count.toFixed()} 筆紀錄`;
+
+          case "INVALID_FILE":
+            return `失敗（${data.file}）\n\u3000無效檔案格式`;
 
           case "MISSING_HEADER":
             return `失敗（${data.file}）\n\u3000缺少標頭「${data.error.join("、")}」`;
@@ -31,7 +33,11 @@ document.getElementById("form-upload")?.addEventListener("submit", (ev) => {
 
       showModal("上傳結果", data.join("\n"));
     })
-    .catch(apiHandler.failed())
+    .catch(
+      apiHandler.failed({
+        413: "檔案過大，請分批上傳",
+      })
+    )
     .finally(() => {
       uploadButton.disabled = false;
     });
@@ -54,16 +60,18 @@ document.getElementById("button-export")?.addEventListener("click", () => {
 document.getElementById("button-delete")?.addEventListener("click", () => {
   axios
     .delete<APIResetDatabase>("/api/donor")
-    .then((res) => {
-      showModal(
-        "成功",
-        [
-          "成功刪除資料：",
-          `\u3000捐款人 ${res.data.data.donors.toFixed()} 人`,
-          `\u3000捐款紀錄 ${res.data.data.records.toFixed()} 筆`,
-        ].join("\n")
-      );
-    })
+    .then((res) =>
+      setTimeout(() => {
+        showModal(
+          "成功",
+          [
+            "成功刪除資料：",
+            `\u3000捐款人 ${res.data.data.donors.toFixed()} 人`,
+            `\u3000捐款紀錄 ${res.data.data.records.toFixed()} 筆`,
+          ].join("\n")
+        );
+      }, 200)
+    )
     .catch(apiHandler.failed());
 });
 
@@ -73,6 +81,10 @@ type APIUploadSheet = APIResponseSuccess<
         type: "SUCCESS";
         file: string;
         count: number;
+      }
+    | {
+        type: "INVALID_FILE";
+        file: string;
       }
     | {
         type: "MISSING_HEADER";

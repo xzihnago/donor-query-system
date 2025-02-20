@@ -1,51 +1,50 @@
 import { PrismaClient } from "@prisma/client";
 
-const findRefTree = async (name: string) => {
-  const root = await prisma.donor.findUnique({
-    where: { name },
-    include: {
-      records: true,
-      superior: true,
-      inferiors: true,
-    },
-  });
+const findRefTree = (name: string) =>
+  prisma.donor
+    .findUniqueOrThrow({
+      where: { name },
+      include: {
+        records: true,
+        superior: true,
+        inferiors: true,
+      },
+    })
+    .then(async (root) => {
+      const data = [root];
 
-  if (!root) return null;
+      // BFS
+      const visited: string[] = [];
+      let index = 0;
+      while (index < data.length) {
+        const current = data[index];
 
-  const data = [root];
+        if (!visited.includes(current.name)) {
+          visited.push(current.name);
 
-  // BFS
-  const visited: string[] = [];
-  let index = 0;
-  while (index < data.length) {
-    const current = data[index];
+          for (const inferior of current.inferiors) {
+            data.push(
+              await prisma.donor.findUniqueOrThrow({
+                where: { id: inferior.id },
+                include: {
+                  records: true,
+                  superior: true,
+                  inferiors: true,
+                },
+              })
+            );
+          }
+        }
 
-    if (!visited.includes(current.name)) {
-      visited.push(current.name);
-
-      for (const inferior of current.inferiors) {
-        data.push(
-          await prisma.donor.findUniqueOrThrow({
-            where: { id: inferior.id },
-            include: {
-              records: true,
-              superior: true,
-              inferiors: true,
-            },
-          })
-        );
+        index++;
       }
-    }
 
-    index++;
-  }
-
-  return data;
-};
+      return data;
+    })
+    .catch(() => null);
 
 const findRefTreeOrThrow = async (name: string) => {
   const data = await findRefTree(name);
-
   if (!data) {
     throw new Error(`"${name}" does not exist`);
   }

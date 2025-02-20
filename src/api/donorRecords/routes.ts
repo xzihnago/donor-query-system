@@ -8,6 +8,7 @@ router.get(
   "/search/:name",
   user.auth,
   user.parse,
+  user.permission(PermissionBits.SEARCH),
   user.keepUp,
   controller.searchRecords
 );
