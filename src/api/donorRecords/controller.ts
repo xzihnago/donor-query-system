@@ -55,14 +55,17 @@ export const uploadRecords: RequestHandler = async (req, res) => {
     // Check if required fields are present
     const error: { line: number; missing: string[] }[] = [];
     const records = contents
-      .map<[unknown, unknown, number]>((row, line) => [
-        row[indexes[0]],
-        row[indexes[1]],
+      .map<[string, number, number]>((row, line) => [
+        row[indexes[0]] ? String(row[indexes[0]]).trim() : "",
+        row[indexes[1]] ? Number(row[indexes[1]]) : NaN,
         line,
       ])
-      .filter((record): record is [string, number, number] => {
-        const missing = ["供養者", "金額"].filter(
-          (_, i) => typeof record[i] !== ["string", "number"][i]
+      .filter((record) => {
+        const missing = ["供養者", "金額"].filter((_, i) =>
+          [
+            (value: string) => value.length === 0,
+            (value: number) => isNaN(value),
+          ][i](record[i] as never)
         );
 
         if (missing.length === 1) {
