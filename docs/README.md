@@ -271,6 +271,9 @@ Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
 若發生循環關聯，則會顯示為下列形式。<br>
 ![循環關聯](./p_relation_cycle.png)
 
+若欄位名稱重複，將會顯示錯誤訊息。<br>
+![重複名稱](./p_relation_duplicate.png)
+
 若資料庫中無此捐款者，則會顯示查無此人訊息。<br>
 ![查無此人](./p_relation_failed_1.png)
 ![查無此人](./p_relation_failed_2.png)
