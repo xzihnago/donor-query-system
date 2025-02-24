@@ -72,6 +72,7 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
       break;
   }
 });
+
 const drawRelationTree = async (name: string) =>
   axios
     .get<APIResponseSuccess<MermainData>>(`/api/donorRelations/${name}`)

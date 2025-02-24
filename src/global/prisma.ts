@@ -1,14 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 
 const findRefTree = (name: string) =>
+  findRefTreeOrThrow(name).catch(() => null);
+
+const findRefTreeOrThrow = (name: string) =>
   prisma.donor
     .findUniqueOrThrow({
       where: { name },
-      include: {
-        records: true,
-        superior: true,
-        inferiors: true,
-      },
+      include,
     })
     .then(async (root) => {
       const data = [root];
@@ -17,39 +16,45 @@ const findRefTree = (name: string) =>
       const visited: string[] = [];
       let index = 0;
       while (index < data.length) {
-        const current = data[index];
+        const current = data[index++];
 
-        if (!visited.includes(current.name)) {
-          visited.push(current.name);
-
-          for (const inferior of current.inferiors) {
-            data.push(
-              await prisma.donor.findUniqueOrThrow({
-                where: { id: inferior.id },
-                include: {
-                  records: true,
-                  superior: true,
-                  inferiors: true,
-                },
-              })
-            );
-          }
+        if (visited.includes(current.name)) {
+          continue;
         }
+        visited.push(current.name);
 
-        index++;
+        const children = await Promise.all(
+          current.inferiors.map((child) =>
+            prisma.donor.findUniqueOrThrow({
+              where: { id: child.id },
+              include,
+            })
+          )
+        );
+
+        data.push(...children);
       }
 
       return data;
-    })
-    .catch(() => null);
+    });
 
-const findRefTreeOrThrow = async (name: string) => {
-  const data = await findRefTree(name);
-  if (!data) {
-    throw new Error(`"${name}" does not exist`);
-  }
-
-  return data;
+const include = {
+  records: {
+    select: {
+      amount: true,
+    },
+  },
+  superior: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+  inferiors: {
+    select: {
+      id: true,
+    },
+  },
 };
 
 export const prisma = new PrismaClient().$extends({
