@@ -3,15 +3,15 @@
 ## 環境變數
 
 ```dosini
-PORT=<number>
 DATABASE_URL=<string>
+PORT=<number>
 JWT_SECRET=<string>
 ```
 
 ## 初始化
 
 ```bash
-pnpm install
+pnpm install -P
 pnpm run prisma:generate
 pnpm run prisma:migrate
 pnpm run prod:run
