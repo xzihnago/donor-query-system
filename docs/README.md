@@ -19,15 +19,17 @@
 }
 ```
 
-所有 API 失敗時，皆會回傳以下格式：<br>
-已處理之錯誤皆會回傳指定的 HTTP 狀態碼。<br>
-若發生未處理錯誤時，將會回傳 `HTTP 500`。
+所有 API 失敗時，皆會回傳以下格式：
 
 ```ts
 {
   error: any,
 }
 ```
+
+已處理之錯誤將會回傳指定的 `HTTP 4xx` 狀態碼。<br>
+請求資料格式不正確時，將會回傳 `HTTP 422`。<br>
+發生未處理錯誤時，將會回傳 `HTTP 500`。
 
 <details>
 <summary>/user</summary>
@@ -90,6 +92,9 @@
 }
 ```
 
+欄位 `donors` 為刪除的捐款者數量。<br>
+欄位 `records` 為刪除的捐款紀錄數量。
+
 </details>
 
 ---
@@ -121,40 +126,19 @@
 
 本 API 需要授權，若授權無效將回傳 `HTTP 401`。
 
-表單中包含任意名稱欄位，檔案格式為一個或多個 Excel 檔案。<br>
-Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
-
-| 欄位名稱 | 資料型態         | 說明                  |
-| -------- | ---------------- | --------------------- |
-| <any>    | `File \| File[]` | 一個或多個 Excel 檔案 |
+```ts
+[string, number][]
+```
 
 #### Response
 
 ```ts
 {
-  data: ({
-      type: "SUCCESS";
-      file: string;
-      count: number;
-  } | {
-      type: "INVALID_FILE";
-      file: string;
-  } | {
-      type: "MISSING_HEADER";
-      file: string;
-      error: string[];
-  } | {
-      type: "INVALID_DATA";
-      file: string;
-      error: {
-          line: number;
-          missing: string[];
-      }[];
-  })[]
+  data: number,
 }
 ```
 
-若請求中無檔案，將回傳 `HTTP 400`。
+欄位 `data` 為上傳的捐款紀錄數量。
 
 ---
 
@@ -166,7 +150,13 @@ Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
 
 #### Response
 
-下載一個統計所有捐款紀錄的 Excel 檔案。
+```ts
+{
+  data: [string, number][],
+}
+```
+
+欄位 `data` 為所有捐款者的捐款紀錄統計，格式為 `[姓名, 金額]`。
 
 </details>
 
@@ -189,6 +179,7 @@ Excel 檔案中必須包含以下欄位：`供養者`、`金額`。
 }
 ```
 
+欄位 `data` 為捐款者的關聯，長度為一的元素為 `[無上級之捐款者]`，長度為二的元素為 `[上級, 下級]`。<br>
 若資料庫中無此捐款者，將回傳 `HTTP 404`。
 
 ---
