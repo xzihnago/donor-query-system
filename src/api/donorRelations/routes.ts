@@ -18,10 +18,10 @@ router.get(
 router.post(
   "/",
   user.auth,
-  middleware.validateSchema.zod(updateDonorRelationsValidate),
   user.parse,
   user.permission(PermissionBits.EDIT_RELATION),
   user.keepUp,
+  middleware.validateSchema.zod(updateDonorRelationsValidate),
   controller.addRelations
 );
 
