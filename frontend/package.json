@@ -2,12 +2,16 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit && tsup",
-    "build-watch": "tsup --watch src/**/*.ts"
+    "build-watch": "tsup --watch src/**/*.ts",
+    "package:eslint": "eslint src",
+    "package:prettier": "prettier -c src/**/*.ts",
+    "package:bump-dependencies": "pnpm up -L"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "mermaid": "^11.4.1",
-    "tsup": "^8.3.6"
+    "tsup": "^8.4.0",
+    "xlsx": "^0.18.5"
   }
 }
