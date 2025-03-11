@@ -1,6 +1,8 @@
 # 捐款查詢系統
 
-## 環境變數
+## 初始化
+
+### 環境變數
 
 ```dosini
 DATABASE_URL=<string>
@@ -8,7 +10,7 @@ PORT=<number>
 JWT_SECRET=<string>
 ```
 
-## 初始化
+### 運行
 
 ```bash
 pnpm install -P
@@ -18,6 +20,32 @@ pnpm run prod:run
 ```
 
 ## 系統架構
+
+```mermaid
+graph LR
+    subgraph 代理
+        client(客戶端)
+        cf(Cloudflare)
+        client --> |WAF|cf
+    end
+
+    subgraph GCP
+        subgraph CE[Compute Engine]
+            ngx(Nginx)
+            static(靜態檔案)
+            express(Express.js)
+            cf --> |Firewall|ngx
+            client --x |Firewall|ngx
+            ngx --> express
+            ngx --> static
+        end
+
+        subgraph SQL
+            pg[(PostgreSQL)]
+            express --> pg
+        end
+    end
+```
 
 目前網站架設於 Google Cloud Platform 上，使用 Compute Engine 虛擬機運行。<br>
 因雲端平台成本考量，本系統前後端皆使用同一個 Express app 提供服務。<br>
