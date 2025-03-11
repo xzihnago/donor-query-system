@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
+import type { z } from "zod";
 import jwt from "jsonwebtoken";
-import { z } from "zod";
 import { utils } from "@xzihnago/express-utils";
 import { loginUserValidate } from "./validates";
 

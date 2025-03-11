@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import { z } from "zod";
+import type { z } from "zod";
 import { updateDonorRelationsValidate } from "./validates";
 
 export const findRelations: RequestHandler = async (req, res) => {
