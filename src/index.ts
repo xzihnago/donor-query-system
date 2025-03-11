@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
-import fileUpload from "express-fileupload";
 import { middleware } from "@xzihnago/express-utils";
 import "@/global";
 import router from "@/router";
@@ -11,13 +10,8 @@ const app = express();
 app.set("trust proxy", 2);
 app.set("view engine", "ejs");
 
-app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
-app.use(
-  fileUpload({
-    defParamCharset: "utf8",
-  })
-);
+app.use(express.json({ limit: "1mb" }));
 
 app.use(middleware.routeLog);
 app.use(middleware.responseHandler);

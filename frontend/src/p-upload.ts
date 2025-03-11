@@ -1,58 +1,129 @@
+import type { CellObject } from "xlsx";
 import { getElement, showModal, apiHandler } from "utils";
 
-document.getElementById("form-upload")?.addEventListener("submit", (ev) => {
-  ev.preventDefault();
+document
+  .getElementById("form-upload")
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  ?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
 
-  const fileInput = getElement<HTMLInputElement>("input-file");
-  const uploadButton = getElement<HTMLButtonElement>("button-upload");
+    const fileInput = getElement<HTMLInputElement>("input-file");
+    const uploadButton = getElement<HTMLButtonElement>("button-upload");
+    uploadButton.disabled = true;
 
-  const formData = new FormData();
-  for (const file of fileInput.files ?? []) {
-    formData.append("files", file);
-  }
+    const tasks = Array.from(fileInput.files ?? [])
+      .map((file) => [file.name, file.arrayBuffer()] as const)
+      .map(async ([file, buffer]) => {
+        const book = XLSX.read(await buffer);
+        const sheet = book.Sheets[book.SheetNames[0]];
 
-  uploadButton.disabled = true;
-  axios
-    .post<APIUploadSheet>("/api/donorRecords/upload", formData)
-    .then((res) => {
-      const data = res.data.data.map((data) => {
-        switch (data.type) {
-          case "SUCCESS":
-            return `成功（${data.file}）\n\u3000匯入 ${data.count.toFixed()} 筆紀錄`;
+        // Check if required headers are present
+        const range = XLSX.utils.decode_range(sheet["!ref"] ?? "");
+        const headers = Array.from(
+          {
+            length: range.e.c - range.s.c + 1,
+          },
+          (_, i) =>
+            sheet[
+              XLSX.utils.encode_cell({ r: range.s.r, c: range.s.c + i })
+            ] as CellObject | undefined
+        ).map((cell) => cell?.v);
 
-          case "INVALID_FILE":
-            return `失敗（${data.file}）\n\u3000無效檔案格式`;
-
-          case "MISSING_HEADER":
-            return `失敗（${data.file}）\n\u3000缺少標頭「${data.error.join("、")}」`;
-
-          case "INVALID_DATA":
-            return `失敗（${data.file}）\n${data.error.map((error) => `\u3000缺少欄位：第 ${error.line.toFixed()} 列「${error.missing.join("、")}」`).join("\n")}`;
+        const missing = ["供養者", "金額"].filter(
+          (header) => !headers.includes(header)
+        );
+        if (missing.length > 0) {
+          return {
+            type: "INVALID_HEADER",
+            file,
+            error: missing,
+          } as const;
         }
+
+        // Check if required fields are present
+        const error: { line: number; missing: string[] }[] = [];
+        const data = XLSX.utils
+          .sheet_to_json<Record<string, string>>(sheet)
+          .map((record) => [
+            record["供養者"] ? String(record["供養者"]).trim() : "",
+            record["金額"] ? Number(record["金額"]) : NaN,
+          ])
+          .filter((record, i) => {
+            const missing = ["供養者", "金額"].filter((_, i) =>
+              [
+                (value: string) => value.length === 0,
+                (value: number) => isNaN(value),
+              ][i](record[i] as never)
+            );
+
+            if (missing.length === 1) {
+              error.push({
+                line: i + 2,
+                missing,
+              });
+            }
+
+            return missing.length === 0;
+          });
+
+        if (error.length > 0) {
+          return {
+            type: "INVALID_DATA",
+            file,
+            error,
+          } as const;
+        }
+
+        return {
+          type: "PENDING",
+          file,
+          count: data.length,
+          data,
+        } as const;
       });
 
-      showModal("上傳結果", data.join("\n"));
-    })
-    .catch(
-      apiHandler.failed({
-        413: "檔案過大，請分批上傳",
+    const data = await Promise.all(tasks);
+    const body = data
+      .filter((data) => data.type === "PENDING")
+      .map((data) => data.data)
+      .flat();
+
+    axios
+      .post("/api/donorRecords/upload", body)
+      .then(() => {
+        const result = data.map((data) => {
+          switch (data.type) {
+            case "PENDING":
+              return `成功（${data.file}）\n\u3000匯入 ${data.count.toFixed()} 筆紀錄`;
+
+            case "INVALID_HEADER":
+              return `失敗（${data.file}）\n\u3000缺少標頭「${data.error.join("、")}」`;
+
+            case "INVALID_DATA":
+              return `失敗（${data.file}）\n${data.error.map((error) => `\u3000缺少欄位：第 ${error.line.toFixed()} 列「${error.missing.join("、")}」`).join("\n")}`;
+          }
+        });
+
+        showModal("上傳結果", result.join("\n"));
       })
-    )
-    .finally(() => {
-      uploadButton.disabled = false;
-    });
-});
+      .catch(apiHandler.failed())
+      .finally(() => {
+        uploadButton.disabled = false;
+      });
+  });
 
 document.getElementById("button-export")?.addEventListener("click", () => {
   axios
-    .get<Blob>("/api/donorRecords/export", {
-      responseType: "blob",
-    })
+    .get<APIResponseSuccess<[string, number][]>>("/api/donorRecords/export")
     .then((res) => {
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(res.data);
-      link.download = `${Date.now().toFixed()}.xlsx`;
-      link.click();
+      const book = XLSX.utils.book_new();
+      const sheet = XLSX.utils.aoa_to_sheet([
+        ["供養者", "金額"],
+        ...res.data.data,
+      ]);
+
+      XLSX.utils.book_append_sheet(book, sheet, "捐款統計");
+      XLSX.writeFile(book, `${Date.now().toFixed()}.xlsx`);
     })
     .catch(apiHandler.failed());
 });
@@ -74,33 +145,6 @@ document.getElementById("button-delete")?.addEventListener("click", () => {
     )
     .catch(apiHandler.failed());
 });
-
-type APIUploadSheet = APIResponseSuccess<
-  (
-    | {
-        type: "SUCCESS";
-        file: string;
-        count: number;
-      }
-    | {
-        type: "INVALID_FILE";
-        file: string;
-      }
-    | {
-        type: "MISSING_HEADER";
-        file: string;
-        error: string[];
-      }
-    | {
-        type: "INVALID_DATA";
-        file: string;
-        error: {
-          line: number;
-          missing: string[];
-        }[];
-      }
-  )[]
->;
 
 type APIResetDatabase = APIResponseSuccess<{
   donors: number;
