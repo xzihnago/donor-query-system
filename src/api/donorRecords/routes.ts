@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { PermissionBits, user } from "@/middleware";
 import * as controller from "./controller";
+import { middleware } from "@xzihnago/express-utils";
+import { uploadDonorRecordsValidate } from "./validates";
 
 const router = Router();
 
@@ -19,6 +21,7 @@ router.post(
   user.parse,
   user.permission(PermissionBits.MANAGE_DATABASE),
   user.keepUp,
+  middleware.validateSchema.zod(uploadDonorRecordsValidate),
   controller.uploadRecords
 );
 
