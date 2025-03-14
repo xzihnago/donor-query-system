@@ -1,11 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit && tsup",
-    "build-watch": "tsup --watch src/**/*.ts",
-    "package:eslint": "eslint src",
-    "package:prettier": "prettier -c src/**/*.ts",
-    "package:bump-dependencies": "pnpm up -L"
+    "dev:build": "tsc --noEmit && tsup",
+    "dev:watch": "tsup --watch src/**/*.ts"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",

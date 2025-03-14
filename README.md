@@ -10,13 +10,12 @@ PORT=<number>
 JWT_SECRET=<string>
 ```
 
-### 運行
+### 安裝依賴
 
 ```bash
 pnpm install -P
-pnpm run prisma:generate
-pnpm run prisma:migrate
-pnpm run prod:run
+pnpm run -r prisma:generate
+pnpm run -r prisma:migrate
 ```
 
 ## 系統架構
