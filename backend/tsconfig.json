@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["ESNext", "DOM"],
 
     "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"]
+    },
 
-    "strict": true,
-    "skipLibCheck": true
+    "strict": true
   }
 }
