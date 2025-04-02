@@ -40,16 +40,14 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
     return;
   }
 
-  const relationData = {
-    superior: superiorInput.value,
-    inferior: inferiorInput.value,
-  };
-
   const submitter = ev.submitter as HTMLButtonElement;
   switch (submitter.name) {
     case "update":
       axios
-        .post("/api/donorRelations", relationData)
+        .post("/api/donorRelations", {
+          superior: superiorInput.value,
+          inferior: inferiorInput.value,
+        })
         .then(() => drawRelationTree(superiorInput.value))
         .catch(
           apiHandler.failed({
@@ -75,20 +73,38 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
 
 const drawRelationTree = async (name: string) =>
   axios
-    .get<APIResponseSuccess<MermainData>>(`/api/donorRelations/${name}`)
+    .get<APIResponseSuccess<APIRelationData>>(`/api/donorRelations/${name}`)
     .then(async (res) => {
-      const data = res.data.data;
+      const [superior, ...inferior] = res.data.data;
+
+      // Graph
       const graph = [
         "graph TD",
-        ...data.map((donor) =>
-          donor.length === 1
-            ? `${donor[0].replace(/\s/g, "")}(${donor[0]})`
-            : `${donor[0].replace(/\s/g, "")}(${donor[0]}) --> ${donor[1].replace(/\s/g, "")}(${donor[1]})`
+        `${superior[0].replace(/\s/g, "")}(${superior[0]})`,
+        ...inferior.map(
+          (donor) =>
+            `${donor[0].replace(/\s/g, "")}(${donor[0]}) --> ${donor[1].replace(/\s/g, "")}(${donor[1]})`
         ),
       ];
 
       const { svg } = await mermaid.render("graphDiv", graph.join("\n"));
       getElement("mermaid").innerHTML = svg;
+
+      // Table
+      const data = (inferior.length ? inferior : [[superior[0], ""]]).map(
+        (donor, i) => [i + 1, ...donor]
+      );
+
+      getElement("table").innerHTML =
+        `
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>功德主</th>
+            <th>眷屬</th>
+          </tr>
+        </thead>
+        ` + XLSX.utils.sheet_to_html(XLSX.utils.aoa_to_sheet(data));
     });
 
-type MermainData = ([string] | [string, string])[];
+type APIRelationData = [[string], ...[string, string][]];
