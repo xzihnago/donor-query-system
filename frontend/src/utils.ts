@@ -32,20 +32,18 @@ export const apiHandler = {
 
   failed:
     (msgs?: APIHandlerFailedMsgs) => (err: AxiosError<APIResponseFailed>) => {
-      if (
-        axios.isAxiosError(err) &&
-        err.response &&
-        msgs?.[err.response.status]
-      ) {
-        const content = msgs[err.response.status];
-        if (content instanceof Function) {
-          showModal("錯誤", content(err.response.data));
-        } else {
-          showModal("錯誤", content);
+      if (axios.isAxiosError(err) && err.response) {
+        const content = msgs?.[err.response.status];
+        if (content) {
+          if (content instanceof Function) {
+            showModal("錯誤", content(err.response.data));
+          } else {
+            showModal("錯誤", content);
+          }
+        } else if (err.response.status === 401) {
+          alert("登入逾時，請重新登入");
+          window.location.replace("/");
         }
-      } else if (err.response?.status === 401) {
-        alert("登入逾時，請重新登入");
-        window.location.replace("/");
       } else {
         showModal(
           "錯誤",

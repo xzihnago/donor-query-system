@@ -1,8 +1,66 @@
 <div class="card shadow col-lg-7 p-0">
-  <label class="card-header h4">預覽</label>
+  <div class="card-header position-relative">
+    <label class="h4 my-0">預覽</label>
+    <div class="position-absolute top-50 end-0 translate-middle-y">
+      <div class="d-flex border rounded mx-1" style="height: 2.5rem">
+        <img
+          class="rel-tab active"
+          src="/images/tree.svg"
+          onclick="switchTab('mermaid')"
+          title="樹狀圖"
+        />
+        <img
+          class="rel-tab"
+          src="/images/table.svg"
+          onclick="switchTab('table')"
+          title="表格"
+        />
+      </div>
+    </div>
+  </div>
 
-  <pre
-    class="d-flex justify-content-center my-0 p-4 mermaid"
-    id="mermaid"
-  ></pre>
+  <div class="d-flex justify-content-center my-0 p-4">
+    <pre class="mermaid rel-content" id="mermaid"></pre>
+    <table
+      class="table table-bordered table-striped table-hover rel-content"
+      id="table"
+      hidden
+    >
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>功德主</th>
+          <th>眷屬</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
 </div>
+
+<style>
+  .rel-tab {
+    cursor: pointer;
+  }
+  .rel-tab.active {
+    background: #dddddd;
+  }
+</style>
+
+<script>
+  function switchTab(id) {
+    document
+      .querySelectorAll(".rel-tab")
+      .forEach((el) => el.classList.remove("active"));
+    document
+      .querySelector(`.rel-tab[onclick="switchTab('${id}')"]`)
+      .classList.add("active");
+
+    document.querySelectorAll(".rel-content").forEach((el) => {
+      if (el.id === id) {
+        el.hidden = false;
+      } else {
+        el.hidden = true;
+      }
+    });
+  }
+</script>
