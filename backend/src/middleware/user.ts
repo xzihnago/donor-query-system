@@ -1,23 +1,22 @@
 import type { User } from "@prisma/client";
 import { middleware } from "@xzihnago/express-utils";
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-    interface Request {
-      user: User;
-    }
+export const auth: Middleware = (req, res, next) => {
+  const token = (req.signedCookies as { token?: string }).token;
+  if (!token) {
+    res.status(401);
+    throw new Error("Token not found");
   }
-}
 
-export const auth = middleware.authentication.jwt.bind(
-  null,
-  process.env.JWT_SECRET ?? "",
-  "token"
-)();
+  return middleware.authentication.jwt(token, process.env.JWT_SECRET ?? "")(
+    req,
+    res,
+    next
+  );
+};
 
 export const parse: Middleware = async (req, _, next) => {
-  const username = (req.jwt.decoded as { username: string }).username;
+  const username = (req.jwt?.payload as { username: string }).username;
   req.user = await prisma.user.findUniqueOrThrow({
     where: {
       username,
@@ -59,4 +58,10 @@ export enum PermissionBits {
   SEARCH = 1,
   EDIT_RELATION = 2,
   MANAGE_DATABASE = 4,
+}
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user: User;
+  }
 }
