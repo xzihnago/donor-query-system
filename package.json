@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "scripts": {
     "dev:run": "pnpm run -r dev:watch",
     "package:eslint": "eslint **/src/**",
