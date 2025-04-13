@@ -100,9 +100,9 @@
 ---
 
 <details>
-<summary>/donorRecords</summary>
+<summary>/donor-record</summary>
 
-### GET `/donorRecords/search/:name`
+### GET `/donor-record/search/:name`
 
 #### Request
 
@@ -120,7 +120,7 @@
 
 ---
 
-### POST `/donorRecords/upload`
+### POST `/donor-record/upload`
 
 #### Request
 
@@ -142,7 +142,7 @@
 
 ---
 
-### GET `/donorRecords/export`
+### GET `/donor-record/export`
 
 #### Request
 
@@ -163,9 +163,9 @@
 ---
 
 <details>
-<summary>/donorRelations</summary>
+<summary>/donor-relations</summary>
 
-### GET `/donorRelations/:name`
+### GET `/donor-relations/:name`
 
 #### Request
 
@@ -184,7 +184,7 @@
 
 ---
 
-### POST `/donorRelations`
+### POST `/donor-relations`
 
 #### Request
 
@@ -203,7 +203,7 @@
 
 ---
 
-### DELETE `/donorRelations/:name`
+### DELETE `/donor-relations/:name`
 
 #### Request
 

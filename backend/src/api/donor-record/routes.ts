@@ -12,7 +12,7 @@ router.get(
   user.parse,
   user.permission(PermissionBits.SEARCH),
   user.keepUp,
-  controller.searchRecords
+  controller.searchRecord
 );
 
 router.post(

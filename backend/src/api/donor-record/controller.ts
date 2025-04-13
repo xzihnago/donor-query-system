@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import type { z } from "zod";
 import { uploadDonorRecordsValidate } from "./validates";
 
-export const searchRecords: RequestHandler = async (req, res) => {
+export const searchRecord: RequestHandler = async (req, res) => {
   const data = await prisma.donor
     .findRefTreeOrThrow(req.params.name)
     .catch(() => {

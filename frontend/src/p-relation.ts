@@ -44,7 +44,7 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
   switch (submitter.name) {
     case "update":
       axios
-        .post("/api/donorRelations", {
+        .post("/api/donor-relations", {
           superior: superiorInput.value,
           inferior: inferiorInput.value,
         })
@@ -59,7 +59,7 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
 
     case "delete":
       axios
-        .delete(`/api/donorRelations/${inferiorInput.value}`)
+        .delete(`/api/donor-relations/${inferiorInput.value}`)
         .then(() => drawRelationTree(superiorInput.value))
         .catch(
           apiHandler.failed({
@@ -73,7 +73,7 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
 
 const drawRelationTree = async (name: string) =>
   axios
-    .get<APIResponseSuccess<APIRelationData>>(`/api/donorRelations/${name}`)
+    .get<APIResponseSuccess<APIRelationData>>(`/api/donor-relations/${name}`)
     .then(async (res) => {
       const [superior, ...inferior] = res.data.data;
 
