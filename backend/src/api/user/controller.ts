@@ -12,7 +12,6 @@ export const login: RequestHandler = async (req, res) => {
       username: data.username,
     },
   });
-
   if (
     !user ||
     !(await utils.password.bcrypt.verify(data.password, user.passwordHash))
@@ -21,27 +20,18 @@ export const login: RequestHandler = async (req, res) => {
     throw new Error("Invalid username or password");
   }
 
-  await prisma.user.update({
-    where: {
-      username: data.username,
-    },
-    data: {
-      updatedAt: new Date(),
-    },
+  const token = jwt.sign(
+    { username: user.username, permissions: user.permissions },
+    process.env.JWT_SECRET ?? "",
+    { expiresIn: 600 }
+  );
+  res.cookie("token", token, {
+    signed: true,
+    httpOnly: true,
+    secure: true,
   });
 
-  const token = jwt.sign(
-    { username: user.username },
-    process.env.JWT_SECRET ?? ""
-  );
-
-  res
-    .cookie("token", token, {
-      signed: true,
-      httpOnly: true,
-      secure: true,
-    })
-    .end();
+  res.end();
 };
 
 export const logout: RequestHandler = (_, res) => {

@@ -10,10 +10,8 @@ router.get("/", (_, res) => {
 
 router.get(
   "/search",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.SEARCH),
-  user.keepUp,
   (req, res) => {
     res.render("common", {
       permission: req.user.permissions,
@@ -24,10 +22,8 @@ router.get(
 
 router.get(
   "/relation",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.EDIT_RELATION),
-  user.keepUp,
   (req, res) => {
     res.render("common", {
       permission: req.user.permissions,
@@ -42,10 +38,8 @@ router.get(
 
 router.get(
   "/upload",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.MANAGE_DATABASE),
-  user.keepUp,
   (req, res) => {
     res.render("common", {
       permission: req.user.permissions,

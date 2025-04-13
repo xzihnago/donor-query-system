@@ -8,29 +8,23 @@ const router = Router();
 
 router.get(
   "/search/:name",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.SEARCH),
-  user.keepUp,
   controller.searchRecord
 );
 
 router.post(
   "/upload",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.MANAGE_DATABASE),
-  user.keepUp,
   middleware.validateSchema.zod(uploadDonorRecordsValidate),
   controller.uploadRecords
 );
 
 router.get(
   "/export",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.MANAGE_DATABASE),
-  user.keepUp,
   controller.exportRecords
 );
 
