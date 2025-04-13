@@ -89,7 +89,7 @@ document
       .flat();
 
     axios
-      .post("/api/donorRecords/upload", body)
+      .post("/api/donor-record/upload", body)
       .then(() => {
         const result = data.map((data) => {
           switch (data.type) {
@@ -114,7 +114,7 @@ document
 
 document.getElementById("button-export")?.addEventListener("click", () => {
   axios
-    .get<APIResponseSuccess<[string, number][]>>("/api/donorRecords/export")
+    .get<APIResponseSuccess<[string, number][]>>("/api/donor-record/export")
     .then((res) => {
       const book = XLSX.utils.book_new();
       const sheet = XLSX.utils.aoa_to_sheet([
