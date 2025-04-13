@@ -8,29 +8,23 @@ const router = Router();
 
 router.get(
   "/:name",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.EDIT_RELATION),
-  user.keepUp,
   controller.findRelations
 );
 
 router.post(
   "/",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.EDIT_RELATION),
-  user.keepUp,
   middleware.validateSchema.zod(updateDonorRelationsValidate),
   controller.addRelations
 );
 
 router.delete(
   "/:name",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.EDIT_RELATION),
-  user.keepUp,
   controller.removeRelations
 );
 

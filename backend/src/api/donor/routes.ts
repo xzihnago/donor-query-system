@@ -6,10 +6,8 @@ const router = Router();
 
 router.delete(
   "/",
-  user.auth,
-  user.parse,
+  user.authentication,
   user.permission(PermissionBits.MANAGE_DATABASE),
-  user.keepUp,
   controller.deleteDonors
 );
 

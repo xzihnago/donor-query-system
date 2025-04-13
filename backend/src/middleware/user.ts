@@ -1,26 +1,30 @@
-import type { User } from "@prisma/client";
-import { middleware } from "@xzihnago/express-utils";
+import jwt from "jsonwebtoken";
 
-export const auth: Middleware = (req, res, next) => {
-  const token = (req.signedCookies as { token?: string }).token;
-  if (!token) {
+export const authentication: Middleware = (req, res, next) => {
+  // Validate token
+  const tokenC = (req.signedCookies as { token?: string }).token;
+  if (!tokenC) {
     res.status(401);
-    throw new Error("Token not found");
+    throw new Error("Token is required");
   }
 
-  return middleware.authentication.jwt(token, process.env.JWT_SECRET ?? "")(
-    req,
-    res,
-    next
-  );
-};
+  try {
+    req.user = jwt.verify(tokenC, process.env.JWT_SECRET ?? "") as never;
+  } catch (error) {
+    res.status(401);
+    throw error;
+  }
 
-export const parse: Middleware = async (req, _, next) => {
-  const username = (req.jwt?.payload as { username: string }).username;
-  req.user = await prisma.user.findUniqueOrThrow({
-    where: {
-      username,
-    },
+  // Rolling token
+  const tokenN = jwt.sign(
+    { username: req.user.username, permissions: req.user.permissions },
+    process.env.JWT_SECRET ?? "",
+    { expiresIn: 10 * 60 }
+  );
+  res.cookie("token", tokenN, {
+    signed: true,
+    httpOnly: true,
+    secure: true,
   });
 
   next();
@@ -36,24 +40,6 @@ export const permission: Middleware<[flag: PermissionBits]> =
     next();
   };
 
-export const keepUp: Middleware = async (req, res, next) => {
-  if (Date.now() - req.user.updatedAt.getTime() > 10 * 60 * 1000) {
-    res.status(401);
-    throw new Error("Token expired");
-  }
-
-  await prisma.user.update({
-    where: {
-      username: req.user.username,
-    },
-    data: {
-      updatedAt: new Date(),
-    },
-  });
-
-  next();
-};
-
 export enum PermissionBits {
   SEARCH = 1,
   EDIT_RELATION = 2,
@@ -62,6 +48,9 @@ export enum PermissionBits {
 
 declare module "express-serve-static-core" {
   interface Request {
-    user: User;
+    user: {
+      username: string;
+      permissions: PermissionBits;
+    };
   }
 }
