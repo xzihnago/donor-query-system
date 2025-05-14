@@ -17,7 +17,7 @@ router.put(
   "/:name",
   user.authentication,
   user.permission(PermissionBits.EDIT_RELATION),
-  middleware.validateSchema.zod(updateSchema),
+  middleware.schemas.zod(updateSchema),
   controller.updateRelations
 );
 

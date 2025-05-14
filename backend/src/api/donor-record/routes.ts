@@ -17,7 +17,7 @@ router.post(
   "/",
   user.authentication,
   user.permission(PermissionBits.MANAGE_DATABASE),
-  middleware.validateSchema.zod(uploadSchema),
+  middleware.schemas.zod(uploadSchema),
   controller.uploadRecord
 );
 

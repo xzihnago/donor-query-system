@@ -5,11 +5,7 @@ import * as controller from "./controller";
 
 const router = Router();
 
-router.post(
-  "/login",
-  middleware.validateSchema.zod(loginSchema),
-  controller.login
-);
+router.post("/login", middleware.schemas.zod(loginSchema), controller.login);
 
 router.get("/logout", controller.logout);
 
