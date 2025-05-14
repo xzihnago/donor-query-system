@@ -1,19 +1,12 @@
 <div class="container d-flex flex-column">
-  <style>
-    @media (max-width: 400px) {
-      .nav-breakpoint {
-        flex-direction: column;
-        align-items: stretch;
-      }
-    }
-  </style>
   <div class="navbar justify-content-center">
     <img src="/images/banner.png" alt="banner" />
     <button class="btn btn-danger mx-1 position-absolute end-0" id="button-logout" type="button">登出</button>
   </div>
+
   <nav class="navbar row-gap-2 justify-content-center bg-body-tertiary nav-breakpoint">
     <% if ((permission & 1) === 1) { %>
-    <a class="btn btn-outline-danger mx-1" role="button" href="/search">查詢積點</a>
+      <a class="btn btn-outline-danger mx-1" role="button" href="/search">查詢積點</a>
     <% } %>
     <% if ((permission & 2) === 2) { %>
       <a class="btn btn-outline-danger mx-1" role="button" href="/relation">加入積點關聯</a>
@@ -23,3 +16,12 @@
     <% } %>
   </nav>
 </div>
+
+<style>
+  @media (max-width: 400px) {
+    .nav-breakpoint {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>

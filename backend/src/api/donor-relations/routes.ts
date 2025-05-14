@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { middleware } from "@xzihnago/express-utils";
 import { PermissionBits, user } from "@/middleware";
-import { updateDonorRelationsValidate } from "./validates";
+import { updateSchema } from "./schemas";
 import * as controller from "./controller";
 
 const router = Router();
@@ -13,19 +13,12 @@ router.get(
   controller.findRelations
 );
 
-router.post(
-  "/",
-  user.authentication,
-  user.permission(PermissionBits.EDIT_RELATION),
-  middleware.validateSchema.zod(updateDonorRelationsValidate),
-  controller.addRelations
-);
-
-router.delete(
+router.put(
   "/:name",
   user.authentication,
   user.permission(PermissionBits.EDIT_RELATION),
-  controller.removeRelations
+  middleware.validateSchema.zod(updateSchema),
+  controller.updateRelations
 );
 
 export default router;

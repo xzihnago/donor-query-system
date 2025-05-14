@@ -1,27 +1,28 @@
 import jwt from "jsonwebtoken";
 
 export const authentication: Middleware = (req, res, next) => {
-  // Validate token
-  const tokenC = (req.signedCookies as { token?: string }).token;
-  if (!tokenC) {
+  // Validate
+  const tokenAccess = (req.signedCookies as { token?: string }).token;
+  if (!tokenAccess) {
     res.status(401);
-    throw new Error("Token is required");
+    throw new Error("Unauthorized");
   }
 
   try {
-    req.user = jwt.verify(tokenC, process.env.JWT_SECRET ?? "") as never;
+    req.user = jwt.verify(tokenAccess, env.JWT_SECRET) as never;
   } catch (error) {
     res.status(401);
     throw error;
   }
 
-  // Rolling token
-  const tokenN = jwt.sign(
+  // Rolling
+  const tokenRefresh = jwt.sign(
     { username: req.user.username, permissions: req.user.permissions },
-    process.env.JWT_SECRET ?? "",
+    env.JWT_SECRET,
     { expiresIn: 10 * 60 }
   );
-  res.cookie("token", tokenN, {
+
+  res.cookie("token", tokenRefresh, {
     signed: true,
     httpOnly: true,
     secure: true,

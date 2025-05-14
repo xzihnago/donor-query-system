@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { middleware } from "@xzihnago/express-utils";
-import { loginUserValidate } from "./validates";
+import { loginSchema } from "./schemas";
 import * as controller from "./controller";
 
 const router = Router();
 
 router.post(
   "/login",
-  middleware.validateSchema.zod(loginUserValidate),
+  middleware.validateSchema.zod(loginSchema),
   controller.login
 );
 

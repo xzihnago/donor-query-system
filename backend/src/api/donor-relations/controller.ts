@@ -1,68 +1,46 @@
 import type { RequestHandler } from "express";
 import type { z } from "zod";
-import { updateDonorRelationsValidate } from "./validates";
+import type { updateSchema } from "./schemas";
+import * as model from "./model";
 
-export const findRelations: RequestHandler = async (req, res) => {
-  const data = await prisma.donor
-    .findRefTreeOrThrow(req.params.name)
-    .catch(() => {
-      res.status(404);
-      throw new Error(req.params.name);
-    });
+export const findRelations: RequestHandler<{ name: string }> = async (
+  req,
+  res
+) => {
+  const data = await model.findRelationsByName(req.params.name);
+  if (!data) {
+    res.status(404);
+    throw new Error(req.params.name);
+  }
 
-  res.ok(
-    data.map((donor) =>
-      donor.superior ? [donor.superior.name, donor.name] : [donor.name]
-    )
-  );
+  const result = data.map((donor) => [donor.superior?.name, donor.name]);
+
+  res.ok(result);
 };
 
-export const addRelations: RequestHandler = async (req, res) => {
-  const data = req.body as z.infer<typeof updateDonorRelationsValidate>;
+export const updateRelations: RequestHandler<
+  { name: string },
+  unknown,
+  z.infer<typeof updateSchema>
+> = async (req, res) => {
+  const inferior = await model.findDonorByName(req.params.name);
+  if (!inferior) {
+    res.status(404);
+    throw new Error(req.params.name);
+  }
 
-  const superior = await prisma.donor
-    .findUniqueOrThrow({
-      where: { name: data.superior },
-    })
-    .catch(() => {
+  let superiorId = null;
+  if (req.body.superior) {
+    const superior = await model.findDonorByName(req.body.superior);
+    if (!superior) {
       res.status(404);
-      throw new Error(data.superior);
-    });
+      throw new Error(req.body.superior);
+    }
 
-  await prisma.donor
-    .update({
-      where: { name: data.inferior },
-      data: {
-        superiorId: superior.id,
-      },
-    })
-    .catch(() => {
-      res.status(404);
-      throw new Error(data.inferior);
-    });
+    superiorId = superior.id;
+  }
 
-  res.end();
-};
-
-export const removeRelations: RequestHandler = async (req, res) => {
-  const donor = await prisma.donor
-    .findUniqueOrThrow({
-      where: { name: req.params.name },
-      include: {
-        inferiors: true,
-      },
-    })
-    .catch(() => {
-      res.status(404);
-      throw new Error(req.params.name);
-    });
-
-  await prisma.donor.update({
-    where: { name: donor.name },
-    data: {
-      superiorId: null,
-    },
-  });
+  await model.updateRelationsByName(inferior.name, superiorId);
 
   res.end();
 };
