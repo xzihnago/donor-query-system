@@ -48,7 +48,7 @@ router.get(
   }
 );
 
-router.get(/.*/, (_, res) => {
+router.get(/^(?!\/api(?:\/|$)).*/, (_, res) => {
   res.redirect("/");
 });
 

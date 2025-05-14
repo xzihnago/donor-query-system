@@ -40,60 +40,49 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
     return;
   }
 
-  const submitter = ev.submitter as HTMLButtonElement;
-  switch (submitter.name) {
-    case "update":
-      axios
-        .post("/api/donor-relations", {
-          superior: superiorInput.value,
-          inferior: inferiorInput.value,
-        })
-        .then(() => drawRelationTree(superiorInput.value))
-        .catch(
-          apiHandler.failed({
-            404: (data) =>
-              `「${(data.error as CommonError).message}」不在資料庫中`,
-          })
-        );
-      break;
-
-    case "delete":
-      axios
-        .delete(`/api/donor-relations/${inferiorInput.value}`)
-        .then(() => drawRelationTree(superiorInput.value))
-        .catch(
-          apiHandler.failed({
-            404: (data) =>
-              `「${(data.error as CommonError).message}」不在資料庫中`,
-          })
-        );
-      break;
+  let superior = null;
+  if ((ev.submitter as HTMLButtonElement).name === "update") {
+    superior = superiorInput.value;
   }
+
+  axios
+    .put(`/api/donor-relations/${inferiorInput.value}`, {
+      superior,
+    })
+    .then(() => drawRelationTree(superiorInput.value))
+    .catch(
+      apiHandler.failed({
+        404: (data) => `「${(data.error as CommonError).message}」不在資料庫中`,
+      })
+    );
 });
 
 const drawRelationTree = async (name: string) =>
   axios
     .get<APIResponseSuccess<APIRelationData>>(`/api/donor-relations/${name}`)
     .then(async (res) => {
-      const [superior, ...inferior] = res.data.data;
-
       // Graph
       const graph = [
         "graph TD",
-        `${superior[0].replace(/\s/g, "")}(${superior[0]})`,
-        ...inferior.map(
-          (donor) =>
-            `${donor[0].replace(/\s/g, "")}(${donor[0]}) --> ${donor[1].replace(/\s/g, "")}(${donor[1]})`
-        ),
+        ...res.data.data.map((relations) => {
+          if (relations[0]) {
+            return `${relations[0].replace(/\s/g, "")}(${relations[0]}) --> ${relations[1].replace(/\s/g, "")}(${relations[1]})`;
+          } else {
+            return `${relations[1].replace(/\s/g, "")}(${relations[1]})`;
+          }
+        }),
       ];
 
       const { svg } = await mermaid.render("graphDiv", graph.join("\n"));
       getElement("mermaid").innerHTML = svg;
 
       // Table
-      const data = (inferior.length ? inferior : [[superior[0], ""]]).map(
-        (donor, i) => [i + 1, ...donor]
-      );
+      const data = (
+        res.data.data.length > 1 ? res.data.data.slice(1) : res.data.data
+      ).map((relations, i) => [
+        i + 1,
+        ...(relations[0] ? relations : [relations[1], ""]),
+      ]);
 
       getElement("table").innerHTML =
         `
@@ -107,4 +96,4 @@ const drawRelationTree = async (name: string) =>
         ` + XLSX.utils.sheet_to_html(XLSX.utils.aoa_to_sheet(data));
     });
 
-type APIRelationData = [[string], ...[string, string][]];
+type APIRelationData = [string | null, string][];

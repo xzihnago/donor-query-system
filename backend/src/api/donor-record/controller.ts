@@ -1,70 +1,43 @@
 import type { RequestHandler } from "express";
 import type { z } from "zod";
-import { uploadDonorRecordsValidate } from "./validates";
+import type { uploadSchema } from "./schemas";
+import * as model from "./model";
 
-export const searchRecord: RequestHandler = async (req, res) => {
-  const data = await prisma.donor
-    .findRefTreeOrThrow(req.params.name)
-    .catch(() => {
-      res.status(404);
-      throw new Error(req.params.name);
-    });
+export const sumRecord: RequestHandler<{ name: string }> = async (req, res) => {
+  const data = await model.sumRecordByName(req.params.name);
+  if (!data) {
+    res.status(404);
+    throw new Error(req.params.name);
+  }
 
-  const amount = data.reduce(
-    (acc, donor) =>
-      acc + donor.records.reduce((acc, record) => acc + record.amount, 0),
-    0
-  );
-
-  res.ok(amount);
+  res.ok(data);
 };
 
-export const uploadRecords: RequestHandler = async (req, res) => {
-  const data = req.body as z.infer<typeof uploadDonorRecordsValidate>;
-
+export const uploadRecord: RequestHandler<
+  unknown,
+  unknown,
+  z.infer<typeof uploadSchema>
+> = async (req, res) => {
   const nameMap = new Proxy<Record<string, number[]>>(
     {},
     {
       get: (target, p: string) => (target[p] ??= []),
     }
   );
-  data.forEach((record) => nameMap[record[0]].push(record[1]));
+  req.body.forEach((record) => nameMap[record[0]].push(record[1]));
 
-  const tasks = Object.entries(nameMap).map(([name, amounts]) =>
-    prisma.donor
-      .upsert({
-        where: { name },
-        create: { name },
-        update: {},
-      })
-      .then((donor) =>
-        prisma.donationRecord.createMany({
-          data: amounts.map((amount) => ({
-            donorId: donor.id,
-            amount,
-          })),
-        })
-      )
-  );
+  const tasks = Object.entries(nameMap).map(model.uploadRecordByTuple);
   await Promise.all(tasks);
 
-  res.ok(data.length);
+  res.ok(req.body.length);
 };
 
-export const exportRecords: RequestHandler = async (_, res) => {
-  const donors = await prisma.donor.findMany({
-    include: { records: true },
-  });
+export const exportRecord: RequestHandler = async (_, res) => {
+  const donors = await model.findAllDonorName();
 
-  const tasks = donors.map(async (donor) => {
-    const data = await prisma.donor.findRefTreeOrThrow(donor.name);
-    const amount = data.reduce(
-      (acc, donor) =>
-        acc + donor.records.reduce((acc, record) => acc + record.amount, 0),
-      0
-    );
-
-    return [donor.name, amount];
+  const tasks = donors.map(async ({ name }) => {
+    const total = await model.sumRecordByName(name);
+    return [name, total];
   });
   const data = await Promise.all(tasks);
 

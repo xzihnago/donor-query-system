@@ -1,16 +1,8 @@
 import type { RequestHandler } from "express";
+import * as model from "./model";
 
 export const deleteDonors: RequestHandler = async (_, res) => {
-  const records = await prisma.donationRecord.deleteMany();
-  const donors = await prisma.donor.deleteMany({
-    where: {
-      superior: null,
-      inferiors: { none: {} },
-    },
-  });
+  const result = await model.deleteDataWithNoRelations();
 
-  res.ok({
-    donors: donors.count,
-    records: records.count,
-  });
+  res.ok(result);
 };
