@@ -89,7 +89,7 @@ document
       .flat();
 
     axios
-      .post("/api/donor-record", body)
+      .post("/api/donors/records", body)
       .then(() => {
         const result = data.map((data) => {
           switch (data.type) {
@@ -114,7 +114,7 @@ document
 
 document.getElementById("button-export")?.addEventListener("click", () => {
   axios
-    .get<APIResponseSuccess<[string, number][]>>("/api/donor-record")
+    .get<APIResponseSuccess<[string, number][]>>("/api/donors/records")
     .then((res) => {
       const book = XLSX.utils.book_new();
       const sheet = XLSX.utils.aoa_to_sheet([
@@ -130,7 +130,7 @@ document.getElementById("button-export")?.addEventListener("click", () => {
 
 document.getElementById("button-delete")?.addEventListener("click", () => {
   axios
-    .delete<APIResetDatabase>("/api/donor")
+    .delete<APIResetDatabase>("/api/donors")
     .then((res) =>
       setTimeout(() => {
         showModal(

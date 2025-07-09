@@ -7,7 +7,7 @@ document.getElementById("form-search")?.addEventListener("submit", (ev) => {
   const searchResult = getElement<HTMLInputElement>("search-result");
 
   axios
-    .get<APIResponseSuccess<number>>(`/api/donor-record/sum/${nameInput.value}`)
+    .get<APIResponseSuccess<number>>(`/api/donors/records/${nameInput.value}`)
     .then((res) => {
       searchResult.value = res.data.data.toFixed();
     })

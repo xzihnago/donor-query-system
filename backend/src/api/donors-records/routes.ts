@@ -7,7 +7,7 @@ import * as controller from "./controller";
 const router = Router();
 
 router.get(
-  "/sum/:name",
+  "/:name",
   user.authentication,
   user.permission(PermissionBits.SEARCH),
   controller.sumRecord
@@ -25,7 +25,7 @@ router.get(
   "/",
   user.authentication,
   user.permission(PermissionBits.MANAGE_DATABASE),
-  controller.exportRecord
+  controller.exportSumRecord
 );
 
 export default router;

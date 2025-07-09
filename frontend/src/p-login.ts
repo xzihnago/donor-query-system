@@ -7,7 +7,7 @@ document.getElementById("form-login")?.addEventListener("submit", (ev) => {
   const passwordInput = getElement<HTMLInputElement>("input-password");
 
   axios
-    .post("/api/user/login", {
+    .post("/api/users/login", {
       username: usernameInput.value,
       password: passwordInput.value,
     })
@@ -19,7 +19,7 @@ document.getElementById("form-login")?.addEventListener("submit", (ev) => {
 
 document.getElementById("button-logout")?.addEventListener("click", () => {
   void axios
-    .get("/api/user/logout")
+    .get("/api/users/logout")
     .catch()
     .finally(() => {
       window.location.replace("/");

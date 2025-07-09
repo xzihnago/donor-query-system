@@ -46,7 +46,7 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
   }
 
   axios
-    .put(`/api/donor-relations/${inferiorInput.value}`, {
+    .put(`/api/donors/relations/${inferiorInput.value}`, {
       superior,
     })
     .then(() => drawRelationTree(superiorInput.value))
@@ -59,7 +59,7 @@ document.getElementById("form-inferior")?.addEventListener("submit", (ev) => {
 
 const drawRelationTree = async (name: string) =>
   axios
-    .get<APIResponseSuccess<APIRelationData>>(`/api/donor-relations/${name}`)
+    .get<APIResponseSuccess<APIRelationData>>(`/api/donors/relations/${name}`)
     .then(async (res) => {
       // Graph
       const graph = [

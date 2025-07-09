@@ -32,7 +32,7 @@ export const uploadRecord: RequestHandler<
   res.ok(req.body.length);
 };
 
-export const exportRecord: RequestHandler = async (_, res) => {
+export const exportSumRecord: RequestHandler = async (_, res) => {
   const donors = await model.findAllDonorName();
 
   const tasks = donors.map(async ({ name }) => {
