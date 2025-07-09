@@ -2,7 +2,8 @@
   "type": "module",
   "scripts": {
     "dev:build": "tsc --noEmit && tsup",
-    "dev:watch": "tsup --watch src/**/*.ts"
+    "dev:watch": "tsup --watch src/**/*.ts",
+    "dev:check": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",

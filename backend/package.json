@@ -1,8 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "dev:check": "tsc --noEmit",
     "dev:watch": "tsx watch src",
+    "dev:check": "tsc --noEmit",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate-dev": "prisma migrate dev",
     "prisma:generate": "prisma generate"
