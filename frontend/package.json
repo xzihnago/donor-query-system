@@ -6,9 +6,9 @@
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
-    "axios": "^1.9.0",
-    "mermaid": "^11.6.0",
-    "tsup": "^8.4.0",
+    "axios": "^1.10.0",
+    "mermaid": "^11.8.1",
+    "tsup": "^8.5.0",
     "xlsx": "^0.18.5"
   }
 }
