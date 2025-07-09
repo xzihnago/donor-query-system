@@ -32,9 +32,9 @@
 發生未處理錯誤時，將會回傳 `HTTP 500`。
 
 <details>
-<summary>/user</summary>
+<summary>/users</summary>
 
-### POST `/user/login`
+### POST `/users/login`
 
 #### Request
 
@@ -54,7 +54,7 @@
 
 ---
 
-### GET `/user/logout`
+### GET `/users/logout`
 
 #### Request
 
@@ -69,9 +69,9 @@
 ---
 
 <details>
-<summary>/donor</summary>
+<summary>/donors</summary>
 
-### DELETE `/donor`
+### DELETE `/donors`
 
 刪除所有捐款紀錄。<br />
 刪除資料庫中所有未加入關聯之捐款者資料。<br />
@@ -95,14 +95,11 @@
 欄位 `donors` 為刪除的捐款者數量。<br />
 欄位 `records` 為刪除的捐款紀錄數量。
 
-</details>
-
 ---
 
-<details>
-<summary>/donor-record</summary>
+### GET `/donors/records/:name`
 
-### GET `/donor-record/sum/:name`
+取得指定捐款者的捐款紀錄金額總計。
 
 #### Request
 
@@ -120,7 +117,29 @@
 
 ---
 
-### POST `/donor-record`
+### GET `/donors/records`
+
+取得所有捐款者的捐款紀錄金額總計。
+
+#### Request
+
+本 API 需要授權，若授權無效將回傳 `HTTP 401`。
+
+#### Response
+
+```ts
+{
+  data: [string, number][],
+}
+```
+
+欄位 `data` 為所有捐款者的捐款紀錄統計，格式為 `[姓名, 金額]`。
+
+---
+
+### POST `/donors/records`
+
+上傳捐款紀錄。
 
 #### Request
 
@@ -142,30 +161,9 @@
 
 ---
 
-### GET `/donor-record`
+### GET `/donors/relations/:name`
 
-#### Request
-
-本 API 需要授權，若授權無效將回傳 `HTTP 401`。
-
-#### Response
-
-```ts
-{
-  data: [string, number][],
-}
-```
-
-欄位 `data` 為所有捐款者的捐款紀錄統計，格式為 `[姓名, 金額]`。
-
-</details>
-
----
-
-<details>
-<summary>/donor-relations</summary>
-
-### GET `/donor-relations/:name`
+取得指定捐款者的關聯。
 
 #### Request
 
@@ -184,7 +182,9 @@
 
 ---
 
-### PUT `/donor-relations/:name`
+### PUT `/donors/relations/:name`
+
+更新指定捐款者的關聯。
 
 #### Request
 
