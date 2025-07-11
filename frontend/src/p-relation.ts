@@ -84,16 +84,9 @@ const drawRelationTree = async (name: string) =>
         ...(relations[0] ? relations : [relations[1], ""]),
       ]);
 
-      getElement("table").innerHTML =
-        `
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>功德主</th>
-            <th>眷屬</th>
-          </tr>
-        </thead>
-        ` + XLSX.utils.sheet_to_html(XLSX.utils.aoa_to_sheet(data));
+      getElement("tbody-relation").innerHTML = XLSX.utils.sheet_to_html(
+        XLSX.utils.aoa_to_sheet(data)
+      );
     });
 
 type APIRelationData = [string | null, string][];
