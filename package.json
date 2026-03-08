@@ -2,8 +2,7 @@
   "type": "module",
   "version": "0.9.1",
   "scripts": {
-    "dev:watch": "pnpm run -r dev:watch",
-    "dev:check": "pnpm run -r dev:check",
+    "dev:check": "tsc --noEmit",
     "package:eslint": "eslint **/src/**",
     "package:prettier": "prettier -c **/src/**",
     "package:bump-dependencies": "pnpm up -r -L"
