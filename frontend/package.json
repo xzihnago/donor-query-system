@@ -1,15 +1,19 @@
 {
   "type": "module",
   "scripts": {
-    "dev:build": "tsc --noEmit && tsup",
-    "dev:watch": "tsup --watch src/**/*.ts",
-    "dev:check": "tsc --noEmit"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/bootstrap": "^5.2.10",
-    "axios": "^1.10.0",
-    "mermaid": "^11.8.1",
-    "tsup": "^8.5.0",
+    "@tailwindcss/vite": "^4.2.1",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "mermaid": "^11.12.3",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.3.1",
+    "vite-plugin-vue-devtools": "^8.0.6",
+    "vue": "^3.5.29",
+    "vue-router": "^5.0.3",
     "xlsx": "^0.18.5"
   }
 }
