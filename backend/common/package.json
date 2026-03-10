@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "name": "@dqs/common",
+  "main": "src/index",
+  "dependencies": {
+    "hono": "^4.12.2",
+    "hono-openapi": "^1.2.0"
+    "zod": "^4.3.6"
+  }
+}

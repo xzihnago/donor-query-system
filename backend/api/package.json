@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "name": "@dqs/api",
+  "main": "src/index",
+  "dependencies": {
+    "@dqs/common": "workspace:^",
+    "@dqs/database": "workspace:^",
+    "@dqs/middleware": "workspace:^",
+    "bcrypt": "^6.0.0",
+    "hono": "^4.12.2",
+    "hono-openapi": "^1.2.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0"
+  }
+}

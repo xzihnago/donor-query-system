@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "name": "@dqs/middleware",
+  "main": "src/index",
+  "dependencies": {
+    "@dqs/common": "workspace:^",
+    "@dqs/database": "workspace:^",
+    "hono": "^4.12.2",
+    "hono-openapi": "^1.2.0"
+  },
+  "devDependencies": {
+    "zod": "^4.3.6"
+  }
+}

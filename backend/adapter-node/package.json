@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev:watch": "tsx watch src"
+  },
+  "dependencies": {
+    "@dqs/server": "workspace:^",
+    "@hono/node-server": "^1.19.9",
+    "dotenv": "^17.3.1",
+    "tsx": "^4.21.0"
+  }
+}

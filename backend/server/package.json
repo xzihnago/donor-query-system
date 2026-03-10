@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "name": "@dqs/server",
+  "main": "src/index",
+  "dependencies": {
+    "@dqs/middleware": "workspace:^",
+    "@dqs/api": "workspace:^",
+    "@scalar/hono-api-reference": "^0.9.44",
+    "hono": "^4.12.2",
+    "hono-openapi": "^1.2.0"
+  }
+}
