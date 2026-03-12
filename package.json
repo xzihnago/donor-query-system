@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "version": "0.9.1",
+  "version": "1.0.0",
   "scripts": {
     "dev:check": "tsc --noEmit",
     "package:eslint": "eslint **/src/**",
