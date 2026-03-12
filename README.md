@@ -6,16 +6,14 @@
 
 ```dosini
 DATABASE_URL=<string>
-PORT=<number>
 JWT_SECRET=<string>
 ```
 
 ### 安裝依賴
 
 ```bash
-pnpm install -P
-pnpm run -r prisma:generate
-pnpm run -r prisma:migrate
+pnpm i -P
+cd backend/database && pnpm run db:generate
 ```
 
 ## 系統架構
@@ -43,32 +41,35 @@ graph LR
         subgraph CE[Compute Engine]
             ngx(Nginx)
             static(靜態檔案)
-            express(Express.js)
+            hono(Hono)
             ngfw --> ngx
-            ngx --> express
+            ngx --> hono
             ngx --> static
         end
 
         subgraph SQL[Cloud SQL]
             pg[(PostgreSQL)]
-            express --> pg
+            hono --> pg
         end
     end
 ```
 
 網站架設於 Google Cloud Platform 上，使用 Compute Engine 虛擬機運行。<br />
-因雲端平台成本考量，本系統前後端皆使用同一個 Express app 提供服務。<br />
-前端頁面為動態內容，由 Express app 提供服務。<br />
-靜態內容放置於 `public` 資料夾，由 Nginx 提供服務。
+後端使用 Hono 框架，提供 API 與 API 文檔頁面。<br />
+前端使用 Vue 框架，提供 SPA 應用。
 
-Express app 使用 pm2 管理，確保服務持續運行。<br />
-對外伺服器由 Nginx 提供服務，並使用 Let's Encrypt 提供的 SSL 憑證進行加密。<br />
-Nginx 會將所有包含副檔名的請求導向 `public` 資料夾，其餘請求則導向 Express app。<br />
-Nginx 設定可參閱[此連結](https://github.com/xzihnago/debian-quick-setup/blob/main/nginx/conf.d/example.conf)
+Hono app 使用 pm2 管理確保持續運行，授權 token 格式為 JWT，有效期限 10 分鐘。每次 API 操作都會重新簽發。<br />
+外部連線由 Nginx 提供服務，並使用 Let's Encrypt 自動化 SSL 憑證加密。<br />
+Nginx 會將路徑 `/api`、`/docs`、`/openapi` 的請求導向 Hono app，其餘路徑提供 SPA 頁面服務。<br />
+[Nginx 設定參閱此連結](https://github.com/xzihnago/debian-quick-setup/blob/main/nginx/conf.d/example.conf)
 
-客戶端與伺服端之間的連線使用 Cloudflare 的 DNS Proxy 保護<br />
+客戶端與伺服端之間的連線由 Cloudflare DNS Proxy 保護<br />
 原點防火牆規則僅允許來自 Cloudflare 的連線。<br />
-限速規則為 20r/10s，超出將封鎖 10s。<br />
-Cloudflare WAF 規則可參閱[此連結](https://github.com/xzihnago/debian-quick-setup/blob/main/cloudflare/waf.txt)
+限速規則為 50r/10s，超出將封鎖 10s。<br />
+[Cloudflare WAF 規則參閱此連結](https://github.com/xzihnago/debian-quick-setup/blob/main/cloudflare/waf.txt)
 
-### 網頁詳細說明請參閱[文件](docs/README.md)
+## 文件
+
+- [API 文件](https://budda.paffuto-rich.com/docs)
+- [頁面說明文件](docs/README.md)
+- ~~[舊版含 API 完整說明](docs/README_old.md)~~
