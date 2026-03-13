@@ -1,10 +1,10 @@
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { ValidationTargets } from "hono";
-import type { z } from "zod";
 import { HTTPException } from "hono/http-exception";
 import { validator as _validator } from "hono-openapi";
 
 export const validator = <
-  T extends z.ZodType,
+  T extends StandardSchemaV1,
   Target extends keyof ValidationTargets,
 >(
   target: Target,
